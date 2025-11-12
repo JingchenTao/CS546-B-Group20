@@ -1,0 +1,17 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "The backend of project City-Park-Explorer. This is the final project of group 20 for class CS-546.",
+  "license": "ISC",
+  "author": "Group 20 of CS-546-B: Chenyu Liu, Yunwei Li, Yige Liu, Jingchen Tao",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    
+    "start" : "node app.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mongodb": "^7.0.0"
+  }
+}
