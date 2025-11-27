@@ -1,0 +1,7 @@
+<h1>城市公园探索</h1>
+<% if (user) { %>
+    <p>你好，<%= user.username %>！欢迎回来。</p>
+    <% } else { %>
+        <p>请登录或注册以开始探索公园。</p>
+        <% } %>
+            <a href="/parks" class="btn">浏览所有公园</a>

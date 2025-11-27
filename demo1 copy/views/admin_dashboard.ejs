@@ -1,0 +1,21 @@
+<h1>管理员控制台</h1>
+
+<h2>添加新公园</h2>
+<form action="/admin/addPark" method="POST">
+    <label>名称: <input type="text" name="name" required></label><br>
+    <label>位置: <input type="text" name="location" required></label><br>
+    <label>描述: <textarea name="description" required></textarea></label><br>
+    <button type="submit">添加公园</button>
+</form>
+
+<h2>现有公园</h2>
+<ul>
+    <% parks.forEach(function(park) { %>
+        <li>
+            <strong>
+                <%= park.name %>
+            </strong> （<%= park.location %>）
+                - <a href="/admin/deletePark/<%= park._id %>" onclick="return confirm('确定删除该公园吗？');">删除</a>
+        </li>
+        <% }); %>
+</ul>

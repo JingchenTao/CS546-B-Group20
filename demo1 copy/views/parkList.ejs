@@ -1,0 +1,16 @@
+<h1>公园列表</h1>
+<ul class="park-list">
+    <% parks.forEach(function(park) { %>
+        <li>
+            <h2><a href="/parks/<%= park._id %>">
+                    <%= park.name %>
+                </a></h2>
+            <p>位置：<%= park.location %>
+            </p>
+            <p>
+                <%= park.description.length> 100 ? park.description.slice(0,100) + '...' : park.description %>
+            </p>
+            <% /* 用户登录后可在详情页收藏公园 */ %>
+        </li>
+        <% }); %>
+</ul>

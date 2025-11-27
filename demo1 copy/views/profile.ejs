@@ -1,0 +1,20 @@
+<h1>个人资料</h1>
+<p><strong>用户名：</strong>
+    <%= user.username %>
+</p>
+<p><strong>管理员：</strong>
+    <%= user.isAdmin ? '是' : '否' %>
+</p>
+
+<h2>收藏的公园</h2>
+<% if (!favorites || favorites.length===0) { %>
+    <p>你还没有收藏任何公园。</p>
+    <% } else { %>
+        <ul>
+            <% favorites.forEach(function(park) { %>
+                <li><a href="/parks/<%= park._id %>">
+                        <%= park.name %>
+                    </a></li>
+                <% }); %>
+        </ul>
+        <% } %>
