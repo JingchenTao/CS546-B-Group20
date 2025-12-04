@@ -1,13 +1,13 @@
 import parksRoutes from './parks.js';
 import usersRoutes from './users.js';
-import reviewRoutes from './review.js';
-import commentRoutes from './comment.js';
+import reviewsRoutes from './review.js';
+import commentsRoutes from './comment.js';
 
 const constructorMethod = (app) => {
   app.use('/parks', parksRoutes);
   app.use('/users', usersRoutes);
-  app.use('/review', reviewRoutes);
-  app.use('/comment', commentRoutes);
+  app.use('/reviews', reviewsRoutes);
+  app.use('/comments', commentsRoutes);
   
   app.use(/(.*)/, (req, res) => {
     res.status(404).json({ error: 'Route not found' });
