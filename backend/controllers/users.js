@@ -1,6 +1,5 @@
 import * as usersData from '../data/users.js';
 
-
 const getErrorMessage = (error) => {
     if (!error) return 'Unknown error';
     if (typeof error === 'string') return error;
@@ -12,6 +11,10 @@ const getErrorMessage = (error) => {
     }
 };
 
+// if someone use this mailbox to register will be identify as admin
+// otherwise, they will be indentified as common user
+//  dont provide role in frontend
+const ADMIN_EMAILS = ['admin@stevens.edu'];
 
 export const registerUser = async (req, res) => {
     try {
@@ -22,8 +25,7 @@ export const registerUser = async (req, res) => {
             password,
             confirmPassword,
             addressZip,
-            addressCity,
-            role
+            addressCity
         } = req.body || {};
 
         if (!firstName || !lastName || !email || !password) {
@@ -38,6 +40,14 @@ export const registerUser = async (req, res) => {
             }
         }
 
+        let finalRole = 'user';
+        if (email && typeof email === 'string') {
+            const lower = email.trim().toLowerCase();
+            if (ADMIN_EMAILS.includes(lower)) {
+                finalRole = 'admin';
+            }
+        }
+
         const user = await usersData.createUser(
             firstName,
             lastName,
@@ -45,7 +55,7 @@ export const registerUser = async (req, res) => {
             password,
             addressZip,
             addressCity,
-            role
+            finalRole
         );
 
         if (req.session) {
@@ -248,4 +258,3 @@ export const getFavoriteParksForCurrentUser = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
-
