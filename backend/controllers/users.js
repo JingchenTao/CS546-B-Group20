@@ -14,11 +14,6 @@ const getErrorMessage = (error) => {
     }
 };
 
-// if someone use this mailbox to register will be identify as admin
-// otherwise, they will be indentified as common user
-//  dont provide role in frontend
-const ADMIN_EMAILS = ['admin@stevens.edu'];
-
 export const registerUser = async (req, res) => {
     try {
         const {
@@ -43,14 +38,6 @@ export const registerUser = async (req, res) => {
             }
         }
 
-        let finalRole = 'user';
-        if (email && typeof email === 'string') {
-            const lower = email.trim().toLowerCase();
-            if (ADMIN_EMAILS.includes(lower)) {
-                finalRole = 'admin';
-            }
-        }
-
         const user = await usersData.createUser(
             firstName,
             lastName,
@@ -58,7 +45,7 @@ export const registerUser = async (req, res) => {
             password,
             addressZip,
             addressCity,
-            finalRole
+            'user'
         );
 
         if (req.session) {
@@ -85,6 +72,32 @@ export const registerUser = async (req, res) => {
             lower.includes('not a valid email')
         ) {
             return res.status(400).json({ error: message });
+        }
+        return res.status(500).json({ error: message });
+    }
+};
+
+// Admin promotes a user to admin
+export const promoteUser = async (req, res) => {
+    try {
+        const { userId } = req.body || {};
+        if (!userId) {
+            return res.status(400).json({ error: 'userId is required' });
+        }
+
+        const updated = await usersData.promoteUserToAdmin(userId);
+        return res.status(200).json(updated);
+    } catch (error) {
+        const message = getErrorMessage(error);
+        const lower = message.toLowerCase();
+        if (lower.includes('validation failed') || lower.includes('must')) {
+            return res.status(400).json({ error: message });
+        }
+        if (lower.includes('user not found')) {
+            return res.status(404).json({ error: message });
+        }
+        if (lower.includes('already an admin')) {
+            return res.status(409).json({ error: message });
         }
         return res.status(500).json({ error: message });
     }

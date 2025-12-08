@@ -1,5 +1,85 @@
 import { dbConnection, closeConnection } from './config/mongoConnection.js';
 import { parks } from './config/mongoCollections.js';
+import * as usersData from './data/users.js';
+
+// Create default admin account
+const createAdminAccount = async () => {
+    try {
+        const adminEmail = 'admin@stevens.edu';
+        const adminPassword = 'Admin123!@#'; // Strong password: uppercase, lowercase, number, special char
+        
+        // Check if admin already exists
+        try {
+            await usersData.getUserByEmailInternal(adminEmail);
+            console.log('Admin account already exists, skipping creation');
+        } catch (error) {
+            // Admin doesn't exist, create it
+            const admin = await usersData.createUser(
+                'Admin',
+                'User',
+                adminEmail,
+                adminPassword,
+                null,
+                null, 
+                'admin' 
+            );
+            console.log(`Created admin account: ${admin.email}`);
+            console.log(`Admin credentials - Email: ${adminEmail}, Password: ${adminPassword}`);
+        }
+    } catch (error) {
+        console.error('Error creating admin account:', error.message);
+    }
+};
+
+// Create test user accounts
+const createTestUsers = async () => {
+    const testUsers = [
+        {
+            firstName: 'Chenyu',
+            lastName: 'Liu',
+            email: 'chenyu.liu@stevens.edu',
+            password: 'Test12345!',
+            addressZip: '10001',
+            addressCity: 'New York'
+        },
+        {
+            firstName: 'Yunwei',
+            lastName: 'Li',
+            email: 'yunwei.li@stevens.edu',
+            password: 'Test54321!',
+            addressZip: '10002',
+            addressCity: 'New York'
+        }
+    ];
+
+    for (const userData of testUsers) {
+        try {
+            try {
+                await usersData.getUserByEmailInternal(userData.email);
+                console.log(`User ${userData.email} already exists, skipping creation`);
+            } catch (error) {
+                const user = await usersData.createUser(
+                    userData.firstName,
+                    userData.lastName,
+                    userData.email,
+                    userData.password,
+                    userData.addressZip,
+                    userData.addressCity,
+                    'user'
+                );
+                console.log(`Created test user: ${user.email} (${user.first_name} ${user.last_name})`);
+                console.log(`  Credentials - Email: ${userData.email}, Password: ${userData.password}`);
+            }
+        } catch (error) {
+            console.error(`Error creating user ${userData.email}:`, error.message);
+        }
+    }
+};
+
+// Initialize database connection and create accounts
+const db = await dbConnection();
+await createAdminAccount();
+await createTestUsers();
 
 const parkData = [
   {
@@ -22838,7 +22918,6 @@ const parkData = [
   }
 ];
 
-const db = await dbConnection();
 const parksCollection = await parks();
 
 await parksCollection.deleteMany({});
