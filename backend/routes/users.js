@@ -7,6 +7,10 @@ const router = express.Router();
 // Registration
 router.post('/register', usersController.registerUser);
 
+// get register
+
+//get login
+
 // Login
 router.post('/login', usersController.loginUser);
 
@@ -28,7 +32,9 @@ router.post('/admin/role', adminAuthMiddleware, usersController.promoteUser);
 // Logout
 router.post('/logout', usersController.logoutUser);
 
+
 // Get user by id (for profile viewing or admin)
 router.get('/:id', usersController.getUserById);
+
 
 export default router;

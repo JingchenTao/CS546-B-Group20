@@ -43,6 +43,9 @@ const getReviewByReviewId = async (id) => {
 const getReviewsByParkId = async (id) => {
     id = checkId(id, 'park ID');
     const reviewsCollection = await reviews();
+    const parksCollection = await parks();
+    const park = await parksCollection.findOne({_id: new ObjectId(id)});
+    if (!park) {throw `No park with this park ID ( ${id} )!`;}
     const reviewList = await reviewsCollection.find({ park_id: new ObjectId(id) }) .toArray();
     if (reviewList.length === 0) { return []; }
     for(let r of reviewList){
