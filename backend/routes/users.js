@@ -25,10 +25,14 @@ router.post('/me/favorites/:parkId', usersController.addFavoriteParkForCurrentUs
 // Remove a park from current user's favorites
 router.delete('/me/favorites/:parkId', usersController.removeFavoriteParkForCurrentUser);
 
+// get logout
+
 // Logout
 router.post('/logout', usersController.logoutUser);
 
+
 // Get user by id (for profile viewing or admin)
 router.get('/:id', usersController.getUserById);
+
 
 export default router;
