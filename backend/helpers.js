@@ -1,4 +1,3 @@
-// Helper functions for park validation
 
 // Trim all string inputs
 export const trimString = (str) => {
