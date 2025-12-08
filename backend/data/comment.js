@@ -1,6 +1,4 @@
 import {parks, users, reviews, comments } from '../config/mongoCollections.js';
-//这里用的复数collections用的单数
-
 import {ObjectId} from 'mongodb';
 import { checkId, checkIsProperRate, checkIsProperReview } from '../controllers/review.js';
 
