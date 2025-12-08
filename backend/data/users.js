@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
+import bcrypt from 'bcrypt';
 import { users, parks } from '../config/mongoCollections.js';
 import { trimString, validateObjectId } from '../helpers.js';
-import { createHash } from 'crypto';
 
 const normalizeString = (value, fieldName) => {
     if (value === undefined || value === null) {
@@ -107,8 +107,9 @@ const validateCity = (city) => {
     return trimmed;
 };
 
-const hashPassword = (password) => {
-    return createHash('sha256').update(password).digest('hex');
+const hashPassword = async (password) => {
+    const saltRounds = 16;
+    return bcrypt.hash(password, saltRounds);
 };
 
 
@@ -178,7 +179,7 @@ export const createUser = async (
         throw new Error('Email is already in use');
     }
 
-    const passwordHash = hashPassword(normalizedPassword);
+    const passwordHash = await hashPassword(normalizedPassword);
 
     const newUser = {
         first_name,
@@ -246,6 +247,45 @@ export const getUserById = async (id) => {
     };
 };
 
+export const promoteUserToAdmin = async (id) => {
+    let validatedId;
+    try {
+        validatedId = validateObjectId(id);
+    } catch (error) {
+        throw new Error(`User ID validation failed: ${error.message || error}`);
+    }
+
+    const usersCollection = await users();
+    const existing = await usersCollection.findOne({ _id: new ObjectId(validatedId) });
+    if (!existing) {
+        throw new Error('User not found');
+    }
+    if (existing.role === 'admin') {
+        throw new Error('User is already an admin');
+    }
+
+    const updateResult = await usersCollection.findOneAndUpdate(
+        { _id: new ObjectId(validatedId) },
+        { $set: { role: 'admin' } },
+        { returnDocument: 'after' }
+    );
+
+    const updatedUser = updateResult.value;
+    return {
+        _id: updatedUser._id.toString(),
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        address_zip: updatedUser.address_zip || null,
+        address_city: updatedUser.address_city || null,
+        favorite_Parks: (updatedUser.favorite_Parks || []).map((id) =>
+            typeof id === 'string' ? id : id.toString()
+        ),
+        createdAt: updatedUser.createdAt
+    };
+};
+
 export const getUserByEmailInternal = async (email) => {
     let normalizedEmail;
     try {
@@ -285,8 +325,8 @@ export const authenticateUser = async (email, password) => {
         throw new Error('Invalid email or password');
     }
 
-    const passwordHash = hashPassword(normalizedPassword);
-    if (user.passwordHash !== passwordHash) {
+    const match = await bcrypt.compare(normalizedPassword, user.passwordHash);
+    if (!match) {
         throw new Error('Invalid email or password');
     }
 

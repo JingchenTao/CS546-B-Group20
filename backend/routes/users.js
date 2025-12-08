@@ -1,5 +1,6 @@
 import express from 'express';
 import * as usersController from '../controllers/users.js';
+import { adminAuthMiddleware } from '../middleware/adminAuth.js';
 
 const router = express.Router();
 
@@ -20,6 +21,9 @@ router.post('/me/favorites/:parkId', usersController.addFavoriteParkForCurrentUs
 
 // Remove a park from current user's favorites
 router.delete('/me/favorites/:parkId', usersController.removeFavoriteParkForCurrentUser);
+
+// Promote a user to admin (admin only)
+router.post('/admin/role', adminAuthMiddleware, usersController.promoteUser);
 
 // Logout
 router.post('/logout', usersController.logoutUser);

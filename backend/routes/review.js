@@ -109,7 +109,7 @@ router
     const userInfo = req.session.user;
 
     if (!userInfo) {
-      return res.status(400).json({error: 'The user should login in'});
+      return res.status(401).json({error: 'The user should login in'});
     }
 
     let userId
