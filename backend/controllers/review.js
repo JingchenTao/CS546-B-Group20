@@ -1,6 +1,5 @@
 import {ObjectId} from 'mongodb';
 
-// check if input is valid string
 function checkIsProperString(val, variableName){
     if (val == null){
             throw `Provided input ( ${variableName} ) does not exist!`;

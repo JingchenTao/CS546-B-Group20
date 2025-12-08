@@ -17,18 +17,14 @@ import {
   trimString
 } from '../helpers.js';
 
-// Helper function to convert all ObjectIds in a park to strings
 const convertParkObjectIds = (park) => {
   if (!park) return park;
   park._id = park._id.toString();
   return park;
 };
-
-// Helper function to build MongoDB query from request query parameters
 export const buildQuery = (reqQuery) => {
   const query = {};
   
-  // Handle search (partial match on park_name, case-insensitive)
   if (reqQuery.search) {
     const searchStr = trimString(reqQuery.search);
     if (searchStr && searchStr.length > 0) {
@@ -36,7 +32,6 @@ export const buildQuery = (reqQuery) => {
     }
   }
   
-  // Handle location (case-insensitive, convert to uppercase)
   if (reqQuery.location) {
     const locationStr = trimString(reqQuery.location).toUpperCase();
     if (locationStr && ['M', 'B', 'Q', 'X', 'R'].includes(locationStr)) {
@@ -44,7 +39,6 @@ export const buildQuery = (reqQuery) => {
     }
   }
   
-  // Handle type (case-insensitive)
   if (reqQuery.type) {
     const typeStr = trimString(reqQuery.type);
     if (typeStr && typeStr.length > 0) {
@@ -52,7 +46,6 @@ export const buildQuery = (reqQuery) => {
     }
   }
   
-  // Handle zipcode (5 digits)
   if (reqQuery.zipcode) {
     const zipStr = trimString(reqQuery.zipcode);
     if (zipStr && /^\d{5}$/.test(zipStr)) {
@@ -60,7 +53,6 @@ export const buildQuery = (reqQuery) => {
     }
   }
   
-  // Handle minRating
   if (reqQuery.minRating !== undefined && reqQuery.minRating !== null) {
     const minRating = parseFloat(reqQuery.minRating);
     if (!isNaN(minRating) && minRating >= 0 && minRating <= 5) {
@@ -71,10 +63,8 @@ export const buildQuery = (reqQuery) => {
   return query;
 };
 
-// Get all parks with filtering and sorting
 export const getAllParks = async (search, location, type, zipcode, minRating, sort) => {
   try {
-    // Validate sort parameter
     let validatedSort;
     try {
       validatedSort = validateSort(sort);
@@ -82,7 +72,6 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
       throw new Error(`Sort validation failed: ${error.message || error}`);
     }
     
-    // Validate minRating if provided
     let validatedMinRating;
     if (minRating !== undefined && minRating !== null) {
       try {
@@ -92,7 +81,6 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
       }
     }
     
-    // Validate zipcode if provided
     if (zipcode !== undefined && zipcode !== null) {
       if (typeof zipcode !== 'string') {
         throw 'Zipcode must be a string';
@@ -103,7 +91,6 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
       }
     }
     
-    // Build query object
     const reqQuery = {
       search: search,
       location: location,
@@ -116,7 +103,6 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
     
     const parksCollection = await parks();
     
-    // Build sort object
     let sortObj = {};
     switch (validatedSort) {
       case 'rating_asc':
@@ -141,17 +127,14 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
         sortObj = { rating: -1 };
     }
     
-    // Get all parks matching query
     let allParks = await parksCollection.find(query).sort(sortObj).toArray();
     
-    // Populate review count for each park
     const reviewCollection = await review();
     for (let park of allParks) {
-      const reviewCount = await reviewCollection.countDocuments({ parkId: park._id.toString() });
+      const reviewCount = await reviewCollection.countDocuments({ park_id: new ObjectId(park._id.toString()) });
       park.reviewCount = reviewCount;
     }
     
-    // Re-sort if sorting by reviews
     if (validatedSort === 'reviews_asc' || validatedSort === 'reviews_desc') {
       allParks.sort((a, b) => {
         if (validatedSort === 'reviews_asc') {
@@ -162,7 +145,6 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
       });
     }
     
-    // Convert ObjectIds to strings
     allParks.forEach(park => {
       convertParkObjectIds(park);
     });
@@ -176,10 +158,8 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
   }
 };
 
-// Get park by ID
 export const getParkById = async (parkId) => {
   try {
-    // Validate parkId using helper
     let trimmedId;
     try {
       trimmedId = validateObjectId(parkId);
@@ -194,9 +174,8 @@ export const getParkById = async (parkId) => {
       throw 'No park found with that ID';
     }
     
-    // Populate review count
     const reviewCollection = await review();
-    const reviewCount = await reviewCollection.countDocuments({ parkId: trimmedId });
+    const reviewCount = await reviewCollection.countDocuments({ park_id: new ObjectId(trimmedId) });
     park.reviewCount = reviewCount;
     
     return convertParkObjectIds(park);
@@ -208,7 +187,6 @@ export const getParkById = async (parkId) => {
   }
 };
 
-// Get popular parks
 export const getPopularParks = async (limit) => {
   try {
     let validatedLimit;
@@ -218,10 +196,8 @@ export const getPopularParks = async (limit) => {
       throw new Error(`Limit validation failed: ${error.message || error}`);
     }
     
-    // Get parks sorted by rating or reviews
     const parksList = await getAllParks(undefined, undefined, undefined, undefined, undefined, 'rating_desc');
     
-    // Sort by review count if rating is the same, then take top N
     parksList.sort((a, b) => {
       if (b.rating !== a.rating) {
         return b.rating - a.rating;
@@ -238,10 +214,8 @@ export const getPopularParks = async (limit) => {
   }
 };
 
-// Get recommended parks
 export const getRecommendParks = async ({ zipcode, location }) => {
   try {
-    // If both zipcode and location provided, prioritize zipcode
     if (zipcode) {
       if (typeof zipcode !== 'string') {
         throw 'Zipcode must be a string';
@@ -255,7 +229,6 @@ export const getRecommendParks = async ({ zipcode, location }) => {
       return parksList.slice(0, 10);
     }
     
-    // If only location provided
     if (location) {
       const trimmedLocation = trimString(location).toUpperCase();
       if (!['M', 'B', 'Q', 'X', 'R'].includes(trimmedLocation)) {
@@ -266,7 +239,6 @@ export const getRecommendParks = async ({ zipcode, location }) => {
       return parksList.slice(0, 10);
     }
     
-    // If neither provided, return top rated parks
     return await getPopularParks(10);
   } catch (error) {
     if (error.message && error.message.includes('Failed to connect to database')) {
@@ -276,16 +248,13 @@ export const getRecommendParks = async ({ zipcode, location }) => {
   }
 };
 
-// Create a new park
 export const createPark = async (park_name, park_location, park_zip, description, park_type) => {
   try {
-    // Validate all parameters are provided
     if (park_name === undefined || park_location === undefined || park_zip === undefined || 
         description === undefined || park_type === undefined) {
       throw 'All parameters must be provided';
     }
     
-    // Trim and validate all inputs
     let trimmedParkName, validatedLocation, validatedZip, trimmedDescription, trimmedParkType;
     
     try {
@@ -320,7 +289,6 @@ export const createPark = async (park_name, park_location, park_zip, description
     
     const parksCollection = await parks();
     
-    // Check for duplicate park names (case-insensitive)
     const existingPark = await parksCollection.findOne({
       park_name: { $regex: new RegExp(`^${trimmedParkName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
     });
@@ -329,7 +297,6 @@ export const createPark = async (park_name, park_location, park_zip, description
       throw 'A park with this name already exists';
     }
     
-    // Create the park object
     const newPark = {
       park_name: trimmedParkName,
       park_location: validatedLocation,
@@ -340,14 +307,12 @@ export const createPark = async (park_name, park_location, park_zip, description
       reviewCount: 0
     };
     
-    // Insert the park into the database
     const insertInfo = await parksCollection.insertOne(newPark);
     
     if (insertInfo.insertedCount === 0) {
       throw 'Could not add park';
     }
     
-    // Get the inserted park and return it
     const insertedPark = await parksCollection.findOne({ _id: insertInfo.insertedId });
     return convertParkObjectIds(insertedPark);
   } catch (error) {
@@ -358,10 +323,8 @@ export const createPark = async (park_name, park_location, park_zip, description
   }
 };
 
-// Update a park
 export const updatePark = async (parkId, updateData) => {
   try {
-    // Validate parkId using helper
     let trimmedId;
     try {
       trimmedId = validateObjectId(parkId);
@@ -369,27 +332,22 @@ export const updatePark = async (parkId, updateData) => {
       throw new Error(`Park ID validation failed: ${error.message || error}`);
     }
     
-    // Validate updateData
     if (!updateData || typeof updateData !== 'object' || Array.isArray(updateData)) {
       throw 'Update data must be an object';
     }
     
     const parksCollection = await parks();
     
-    // Check if park exists
     const existingPark = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     if (!existingPark) {
       throw 'No park found with that ID';
     }
     
-    // Build update object
     const updateObj = {};
     
-    // Validate and add park_name if provided
     if (updateData.park_name !== undefined) {
       try {
         const trimmedParkName = validateParkName(trimString(updateData.park_name));
-        // Check for duplicate names (excluding current park)
         const duplicatePark = await parksCollection.findOne({
           park_name: { $regex: new RegExp(`^${trimmedParkName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
           _id: { $ne: new ObjectId(trimmedId) }
@@ -403,7 +361,6 @@ export const updatePark = async (parkId, updateData) => {
       }
     }
     
-    // Validate and add park_location if provided
     if (updateData.park_location !== undefined) {
       try {
         updateObj.park_location = validateParkLocation(trimString(updateData.park_location));
@@ -412,7 +369,6 @@ export const updatePark = async (parkId, updateData) => {
       }
     }
     
-    // Validate and add park_zip if provided
     if (updateData.park_zip !== undefined) {
       try {
         updateObj.park_zip = validateParkZip(updateData.park_zip);
@@ -421,7 +377,6 @@ export const updatePark = async (parkId, updateData) => {
       }
     }
     
-    // Validate and add description if provided
     if (updateData.description !== undefined) {
       try {
         updateObj.description = validateDescription(trimString(updateData.description));
@@ -430,7 +385,6 @@ export const updatePark = async (parkId, updateData) => {
       }
     }
     
-    // Validate and add park_type if provided
     if (updateData.park_type !== undefined) {
       try {
         updateObj.park_type = validateParkType(trimString(updateData.park_type));
@@ -439,17 +393,14 @@ export const updatePark = async (parkId, updateData) => {
       }
     }
     
-    // Rating cannot be updated through this function
     if (updateData.rating !== undefined) {
       throw 'Rating cannot be modified directly. Use reParkRating() to update rating.';
     }
     
-    // If no fields to update, return existing park
     if (Object.keys(updateObj).length === 0) {
       return convertParkObjectIds(existingPark);
     }
     
-    // Update the park
     const updateInfo = await parksCollection.updateOne(
       { _id: new ObjectId(trimmedId) },
       { $set: updateObj }
@@ -459,7 +410,6 @@ export const updatePark = async (parkId, updateData) => {
       throw 'Could not update park';
     }
     
-    // Get the updated park and return it
     const updatedPark = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     return convertParkObjectIds(updatedPark);
   } catch (error) {
@@ -470,19 +420,14 @@ export const updatePark = async (parkId, updateData) => {
   }
 };
 
-// Helper function for cascade delete
-// This is a utility function I added to handle cascade deletion
-// It calls deleteReview() and deleteCommentsByReviewId() if they exist, otherwise deletes directly
 const deleteParkCascade = async (parkId) => {
   try {
     const reviewCollection = await review();
     const commentCollection = await comment();
     const usersCollection = await users();
     
-    // Get all reviews for this park
-    const parkReviews = await reviewCollection.find({ parkId: parkId.toString() }).toArray();
+    const parkReviews = await reviewCollection.find({ park_id: new ObjectId(parkId.toString()) }).toArray();
     
-    // Try to import deleteReview and deleteCommentsByReviewId if they exist
     let deleteReviewFn, deleteCommentsByReviewIdFn;
     try {
       const reviewModule = await import('./review.js');
@@ -497,45 +442,36 @@ const deleteParkCascade = async (parkId) => {
       deleteCommentsByReviewIdFn = null;
     }
     
-    // Delete all comments and reviews for this park
     for (let reviewDoc of parkReviews) {
-      // Try to use deleteCommentsByReviewId if available
       if (deleteCommentsByReviewIdFn) {
         try {
           await deleteCommentsByReviewIdFn(reviewDoc._id.toString());
         } catch (error) {
-          // Fallback to direct deletion
-          await commentCollection.deleteMany({ reviewId: reviewDoc._id.toString() });
+          await commentCollection.deleteMany({ review_id: new ObjectId(reviewDoc._id.toString()) });
         }
       } else {
-        // Direct deletion
-        await commentCollection.deleteMany({ reviewId: reviewDoc._id.toString() });
+        await commentCollection.deleteMany({ review_id: new ObjectId(reviewDoc._id.toString()) });
       }
       
-      // Try to use deleteReview if available
       if (deleteReviewFn) {
         try {
           await deleteReviewFn(reviewDoc._id.toString());
         } catch (error) {
-          // Fallback to direct deletion
           await reviewCollection.deleteOne({ _id: reviewDoc._id });
         }
       } else {
-        // Direct deletion
         await reviewCollection.deleteOne({ _id: reviewDoc._id });
       }
     }
     
-    // Remove parkId from all users' favorites
     await usersCollection.updateMany(
-      { favorites: parkId.toString() },
-      { $pull: { favorites: parkId.toString() } }
+      { favorite_Parks: parkId.toString() },
+      { $pull: { favorite_Parks: parkId.toString() } }
     );
     
-    // Also handle ObjectId format
     await usersCollection.updateMany(
-      { favorites: new ObjectId(parkId) },
-      { $pull: { favorites: new ObjectId(parkId) } }
+      { favorite_Parks: new ObjectId(parkId) },
+      { $pull: { favorite_Parks: new ObjectId(parkId) } }
     );
     
     return true;
@@ -544,10 +480,8 @@ const deleteParkCascade = async (parkId) => {
   }
 };
 
-// Delete a park
 export const deletePark = async (parkId) => {
   try {
-    // Validate parkId using helper
     let trimmedId;
     try {
       trimmedId = validateObjectId(parkId);
@@ -557,17 +491,14 @@ export const deletePark = async (parkId) => {
     
     const parksCollection = await parks();
     
-    // First, get the park to return its name
     const park = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     
     if (!park) {
       throw 'No park found with that ID';
     }
     
-    // Perform cascade delete
     await deleteParkCascade(trimmedId);
     
-    // Delete the park
     const deleteInfo = await parksCollection.deleteOne({ _id: new ObjectId(trimmedId) });
     
     if (deleteInfo.deletedCount === 0) {
@@ -586,10 +517,8 @@ export const deletePark = async (parkId) => {
   }
 };
 
-// Recalculate park rating
 export const reParkRating = async (parkId) => {
   try {
-    // Validate parkId using helper
     let trimmedId;
     try {
       trimmedId = validateObjectId(parkId);
@@ -600,27 +529,22 @@ export const reParkRating = async (parkId) => {
     const parksCollection = await parks();
     const reviewCollection = await review();
     
-    // Check if park exists
     const park = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     if (!park) {
       throw 'No park found with that ID';
     }
     
-    // Get all reviews for this park
-    const parkReviews = await reviewCollection.find({ parkId: trimmedId }).toArray();
+    const parkReviews = await reviewCollection.find({ park_id: new ObjectId(trimmedId) }).toArray();
     
-    // Calculate average rating
     let newRating = 0;
     if (parkReviews.length > 0) {
       const sum = parkReviews.reduce((acc, review) => {
         return acc + (review.rating || 0);
       }, 0);
       newRating = sum / parkReviews.length;
-      // Round to 1 decimal place
       newRating = Math.round(newRating * 10) / 10;
     }
     
-    // Update park rating
     const updateInfo = await parksCollection.updateOne(
       { _id: new ObjectId(trimmedId) },
       { $set: { rating: newRating } }
@@ -630,7 +554,6 @@ export const reParkRating = async (parkId) => {
       throw 'Could not update park rating';
     }
     
-    // Get the updated park and return it
     const updatedPark = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     return convertParkObjectIds(updatedPark);
   } catch (error) {

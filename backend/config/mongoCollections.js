@@ -19,8 +19,6 @@ const commentCol = getCollectionFn('comment');
 
 export const users = usersCol;
 export const parks = parksCol;
-
-// 原本只有单数导致报错，单复数都导出，兼容所有文件
 export const review = reviewCol;
 export const reviews = reviewCol;
 

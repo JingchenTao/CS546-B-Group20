@@ -1,7 +1,6 @@
 import * as parksData from '../data/parks.js';
 import { ObjectId } from 'mongodb';
 
-// Get all parks
 export const getAllParks = async (req, res) => {
   try {
     const { search, location, type, zipcode, minRating, sort } = req.query;
@@ -17,12 +16,10 @@ export const getAllParks = async (req, res) => {
   }
 };
 
-// Get park by ID
 export const getParkById = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Controller layer validation - first line of defense
     if (!id || typeof id !== 'string' || id.trim() === '') {
       return res.status(400).json({ error: 'Park ID must be a non-empty string' });
     }
@@ -31,7 +28,6 @@ export const getParkById = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    // Data layer will also validate (second line of defense)
     const park = await parksData.getParkById(id);
     
     res.status(200).json(park);
@@ -46,7 +42,6 @@ export const getParkById = async (req, res) => {
   }
 };
 
-// Get popular parks
 export const getPopularParks = async (req, res) => {
   try {
     const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
@@ -62,7 +57,6 @@ export const getPopularParks = async (req, res) => {
   }
 };
 
-// Get recommended parks
 export const getRecommendParks = async (req, res) => {
   try {
     const { zipcode, location } = req.query;
@@ -78,12 +72,10 @@ export const getRecommendParks = async (req, res) => {
   }
 };
 
-// Create a new park
 export const createPark = async (req, res) => {
   try {
     const { park_name, park_location, park_zip, description, park_type } = req.body;
     
-    // Check if all fields are provided
     if (park_name === undefined || park_location === undefined || park_zip === undefined || 
         description === undefined || park_type === undefined) {
       return res.status(400).json({ error: 'All fields must be provided' });
@@ -103,13 +95,11 @@ export const createPark = async (req, res) => {
   }
 };
 
-// Update a park
 export const updatePark = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
     
-    // Controller layer validation - first line of defense
     if (!id || typeof id !== 'string' || id.trim() === '') {
       return res.status(400).json({ error: 'Park ID must be a non-empty string' });
     }
@@ -118,7 +108,6 @@ export const updatePark = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    // Data layer will also validate (second line of defense)
     const updatedPark = await parksData.updatePark(id, updateData);
     
     res.status(200).json(updatedPark);
@@ -139,12 +128,10 @@ export const updatePark = async (req, res) => {
   }
 };
 
-// Delete a park
 export const deletePark = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Controller layer validation - first line of defense
     if (!id || typeof id !== 'string' || id.trim() === '') {
       return res.status(400).json({ error: 'Park ID must be a non-empty string' });
     }
@@ -153,7 +140,6 @@ export const deletePark = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    // Data layer will also validate (second line of defense)
     const result = await parksData.deletePark(id);
     
     res.status(200).json(result);
@@ -168,12 +154,10 @@ export const deletePark = async (req, res) => {
   }
 };
 
-// Recalculate park rating
 export const reParkRating = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Controller layer validation - first line of defense
     if (!id || typeof id !== 'string' || id.trim() === '') {
       return res.status(400).json({ error: 'Park ID must be a non-empty string' });
     }
@@ -182,7 +166,6 @@ export const reParkRating = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    // Data layer will also validate (second line of defense)
     const updatedPark = await parksData.reParkRating(id);
     
     res.status(200).json(updatedPark);
