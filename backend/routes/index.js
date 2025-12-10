@@ -8,7 +8,7 @@ const constructorMethod = (app) => {
     res.render('homepage');
   });
 
-  // Static routes with fake data
+  // update with fake data
   app.get('/parks', (req, res) => {
     const fakeParks = [
       {
