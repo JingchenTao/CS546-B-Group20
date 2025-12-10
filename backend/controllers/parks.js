@@ -86,7 +86,7 @@ export const createPark = async (req, res) => {
     res.status(200).json(newPark);
   } catch (error) {
     if (error.message && error.message.includes('already exists')) {
-      return res.status(400).json({ error: error.message });
+      return res.status(409).json({ error: error.message });
     }
     if (error.message && error.message.includes('validation failed')) {
       return res.status(400).json({ error: error.message });
@@ -119,7 +119,7 @@ export const updatePark = async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
     if (error.message && error.message.includes('already exists')) {
-      return res.status(400).json({ error: error.message });
+      return res.status(409).json({ error: error.message });
     }
     if (error.message && error.message.includes('cannot be modified directly')) {
       return res.status(400).json({ error: error.message });

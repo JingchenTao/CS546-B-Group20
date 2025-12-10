@@ -131,7 +131,6 @@ export const createUser = async (
     let normalizedRole;
     let zip;
     let city;
-
     try {
         first_name = validateName(firstName, 'First name');
     } catch (error) {
@@ -174,11 +173,13 @@ export const createUser = async (
         throw new Error(`City validation failed: ${error.message || error}`);
     }
 
+
     const existingUser = await usersCollection.findOne({ email: normalizedEmail });
     if (existingUser) {
         throw new Error('Email is already in use');
     }
 
+    
     const passwordHash = await hashPassword(normalizedPassword);
 
     const newUser = {
@@ -312,24 +313,20 @@ export const authenticateUser = async (email, password) => {
     } catch (error) {
         throw new Error(`Email validation failed: ${error.message || error}`);
     }
-
     try {
         normalizedPassword = validatePassword(password);
     } catch (error) {
         throw new Error(`Password validation failed: ${error.message || error}`);
     }
-
     const usersCollection = await users();
     const user = await usersCollection.findOne({ email: normalizedEmail });
     if (!user) {
         throw new Error('Invalid email or password');
     }
-
     const match = await bcrypt.compare(normalizedPassword, user.passwordHash);
     if (!match) {
         throw new Error('Invalid email or password');
     }
-
     return {
         _id: user._id.toString(),
         first_name: user.first_name,
@@ -349,28 +346,32 @@ export const authenticateUser = async (email, password) => {
 export const addFavoritePark = async (userId, parkId) => {
     let validatedUserId;
     let validatedParkId;
-
     try {
         validatedUserId = validateObjectId(userId);
     } catch (error) {
         throw new Error(`User ID validation failed: ${error.message || error}`);
     }
-
     try {
         validatedParkId = validateObjectId(parkId);
     } catch (error) {
         throw new Error(`Park ID validation failed: ${error.message || error}`);
     }
-
     const usersCollection = await users();
     const parksCollection = await parks();
-
     const parkObjectId = new ObjectId(validatedParkId);
     const park = await parksCollection.findOne({ _id: parkObjectId });
     if (!park) {
         throw new Error('Park not found');
     }
 
+    let currentFavorite = (await getUserById(validatedUserId)).favorite_Parks
+    
+    for( let one of currentFavorite){
+        if (one.toString() === validatedParkId){
+           let removed = await removeFavoritePark(validatedUserId, validatedParkId);
+           return removed;
+        }
+    }
     const updateResult = await usersCollection.findOneAndUpdate(
         { _id: new ObjectId(validatedUserId) },
         { $addToSet: { favorite_Parks: parkObjectId } },
@@ -407,6 +408,7 @@ export const removeFavoritePark = async (userId, parkId) => {
     }
 
     const usersCollection = await users();
+
 
     const updateResult = await usersCollection.findOneAndUpdate(
         { _id: new ObjectId(validatedUserId) },

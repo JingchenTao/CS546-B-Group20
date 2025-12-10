@@ -35,9 +35,9 @@ app.use('/users/login', async (req, res, next) => {
      if(req.method === 'GET'){
           if (req.session.user) {
                if (req.session.user.role === 'admin') {
-                         return res.redirect('/users/admin');
+                         return res.redirect('/users/adminProfile');
                     } else {
-                         return res.redirect('/users/me');
+                         return res.redirect('/users/userProfile');
                     }
           } 
      }
@@ -48,50 +48,41 @@ app.use('/users/register', async (req, res, next) => {
      if(req.method === 'GET'){
           if (req.session.user) {
                if (req.session.user.role === 'admin') {
-                         return res.redirect('/users/admin');;
+                         return res.redirect('/users/adminProfile');;
                     } else {
-                         return res.redirect('/users/me');
+                         return res.redirect('/users/userProfile');
                     }
           } 
      }
      next();
 });
 
-app.use('/users/me', async (req, res, next) => {
-     if(req.method === 'GET'){
-          if (!req.session.user) {
-               return res.redirect('/users/login');
-          } else { next();}
-     } else {next();} 
 
+
+app.use('/users/userProfile', async (req, res, next) => {
+     if(req.method === 'GET' && !req.session.user){
+          return res.redirect('/users/login');
+     } 
+     next();
 });
 
 
-app.use('/users/me/favorites', async (req, res, next) => {
-     if(req.method === 'GET'){
-          if (!req.session.user) {
-               return res.redirect('/users/login');
-          } else { next();}
-     } else {next();} 
-
-});
-
-
-app.use('/users/admin', async (req, res, next) => {
+app.use('/users/adminProfile', async (req, res, next) => {
      if(req.method === 'GET'){
           if (!req.session.user) {
                return res.redirect('/users/login');
           } else if( req.session.user.role !== 'admin'){
                return res.status(403).render('error',{title:'admin',error: '403: the user does not have permission to view the page!',
-                                            redirectLink: '/users/me'});
+                                            redirectLink: '/users/userProfile'});
           } 
           next();
      } else {
           next();
      } 
-});
 
-app.use('/users/signout', async (req, res, next) => {
+})
+
+app.use('/users/logout', async (req, res, next) => {
      if(req.method === 'GET'){
           if (!req.session.user) {
                return res.redirect('/users/login');
