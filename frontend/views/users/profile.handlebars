@@ -1,0 +1,23 @@
+<h1>User Profile</h1>
+
+<div class="profile-info">
+  <h2>{{user.firstName}} {{user.lastName}}</h2>
+  <p><strong>Email:</strong> {{user.email}}</p>
+  <p><strong>Address:</strong> {{user.addressCity}}, {{user.addressZip}}</p>
+</div>
+
+<div class="favorites-section">
+  <h2>Favorite Parks</h2>
+  {{#if favorites.length}}
+    <ul class="favorites-list">
+      {{#each favorites}}
+        <li>
+          <a href="/parks/{{id}}">{{name}}</a> - {{location}} (Rating: {{rating}}/5.0)
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No favorite parks yet.</p>
+  {{/if}}
+</div>
+
