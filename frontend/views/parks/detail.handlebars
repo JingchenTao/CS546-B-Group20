@@ -1,0 +1,23 @@
+<div class="park-detail">
+  <h1>{{park.name}}</h1>
+  
+  <div class="park-info">
+    <p><strong>Description:</strong> {{park.description}}</p>
+    <p><strong>Type:</strong> {{park.type}}</p>
+    <p><strong>Zip Codes:</strong> {{park.zipCodes}}</p>
+    <p><strong>Rating:</strong> {{park.rating}}/5.0</p>
+  </div>
+
+  <div class="reviews-section">
+    <h2>Reviews</h2>
+    {{#each reviews}}
+      <div class="review-item">
+        <h3>{{userName}}</h3>
+        <p><strong>Rating:</strong> {{rating}}/5.0</p>
+        <p>{{comment}}</p>
+        <p class="review-date">{{date}}</p>
+      </div>
+    {{/each}}
+  </div>
+</div>
+
