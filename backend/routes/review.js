@@ -191,11 +191,12 @@ router
     try {
       reviewInfo = await reviewMethod.addReview(userId, req.params.parkId, reviewData.rating, reviewData.review_content);
 
-      return res.status(200).json(reviewInfo);
+      
 
     } catch (e) {
-
-
+      if (typeof e === 'string' && e.includes('Duplicate reviews are not allowed')) {
+        return res.status(409).json({ error: e });
+      }
       return res.status(500).json({error: 'Internal server error!'});
     }
 

@@ -2,8 +2,9 @@ import {parks, users, reviews, comments } from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import { checkId, checkIsProperRate, checkIsProperReview } from '../controllers/review.js';
 
+
+// get comment by comment id
 const getCommentByCommentId = async (commentId) => {
-    
     commentId = checkId(commentId, 'comment ID');
     const commentsCollection = await comments();
     const comment = await commentsCollection.findOne({_id: new ObjectId(commentId)});
@@ -11,6 +12,7 @@ const getCommentByCommentId = async (commentId) => {
     comment._id = comment._id.toString();
     return comment;
 };
+
 
 const getCommentsByReviewId = async (reviewId) => {
     reviewId = checkId(reviewId, 'review ID');
@@ -22,7 +24,6 @@ const getCommentsByReviewId = async (reviewId) => {
         r.user_id = r.user_id.toString();
         r.review_id = r.review_id.toString();
     }
-    
     return commentsList;
 };
 
@@ -36,9 +37,9 @@ const getCommentsByUserId = async (userId) => {
         r.user_id = r.user_id.toString();
         r.review_id = r.review_id.toString();
     }
-    
     return commentsList;
 };
+
 
 const addComment = async (
     userId,
@@ -49,8 +50,6 @@ const addComment = async (
     userId = checkId(userId, 'user ID');
     reviewId = checkId(reviewId, 'review ID');
     comment_content = checkIsProperReview(comment_content, 'comment content');
-
-
     const usersCollection = await users();
     const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
@@ -60,9 +59,7 @@ const addComment = async (
     if(!review){
         throw `Could not find this review ID ( ${reviewId} ) !`;
     }
-
     const commentsCollection = await comments();
-
     if(parentCommentId){
         parentCommentId = checkId(parentCommentId, 'parent Comment ID');
         const currentUserCommentList = await commentsCollection.find({ user_id: new ObjectId(userId) }) .toArray();
@@ -75,7 +72,6 @@ const addComment = async (
         }
         parentCommentId = new ObjectId(parentCommentId);    
     } 
-
     let newComments = {
         user_id: new ObjectId(userId),
         review_id: new ObjectId(reviewId),
@@ -83,18 +79,12 @@ const addComment = async (
         comment_content: comment_content,
         createdAt: new Date(),
         updatedAt: null
-
     }
-
-
     const insertInfo = await commentsCollection.insertOne(newComments);
     if (!insertInfo.acknowledged || !insertInfo.insertedId){
         throw 'Could not add this comment to the review';
     }  
-
-
     const addedComments = await getCommentByCommentId(insertInfo.insertedId.toString());
-
     return addedComments;
 };
 
@@ -117,16 +107,14 @@ const updateComment = async (
             }},
         {returnDocument: 'after'}
     );
-
     if (!updatedInfo){
         throw 'Could not upgrade this comment!';
     }  
-
     updatedInfo._id = updatedInfo._id.toString();
-
     return updatedInfo;
-
 }
+
+
 
 const deleteCommentByCommentId = async (
     commentID
@@ -139,10 +127,10 @@ const deleteCommentByCommentId = async (
     if (!deletionInfo) {
         throw `Could not delete the comment with id (${commentID})`;
     }
-
     return {comment_id: deletionInfo._id.toString(), deleted: true};
-
 }
+
+
 
 const deleteCommentByReviewID = async (
     reviewId
@@ -150,10 +138,7 @@ const deleteCommentByReviewID = async (
     reviewId = checkId(reviewId, 'review id');
     let commentsList = await getCommentsByReviewId(reviewId);
     const commentsCollection = await comments();
- 
     const deleteInfo = await commentsCollection.deleteMany({ review_id: new ObjectId(reviewId) });
-
-
     return {deleted_number: deleteInfo.deletedCount, deleted: true};
 }
 

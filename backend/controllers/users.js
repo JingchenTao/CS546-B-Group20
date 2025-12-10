@@ -1,5 +1,3 @@
-// no errro.render
-
 
 import * as usersData from '../data/users.js';
 
@@ -14,6 +12,7 @@ const getErrorMessage = (error) => {
     }
 };
 
+
 export const registerUser = async (req, res) => {
     try {
         const {
@@ -25,19 +24,12 @@ export const registerUser = async (req, res) => {
             addressZip,
             addressCity
         } = req.body || {};
-
-        if (!firstName || !lastName || !email || !password) {
-            return res
-                .status(400)
-                .json({ error: 'firstName, lastName, email, and password are required' });
+        if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            return res.status(400).json({ error: 'firstName, lastName, email, password,  confirmPassword are required' });
         }
-
-        if (confirmPassword !== undefined && confirmPassword !== null) {
-            if (confirmPassword !== password) {
-                return res.status(400).json({ error: 'Password and confirmPassword do not match' });
-            }
+        if (confirmPassword !== password) {
+            return res.status(400).json({ error: 'Password and confirmPassword do not match' });
         }
-
         const user = await usersData.createUser(
             firstName,
             lastName,
@@ -47,23 +39,14 @@ export const registerUser = async (req, res) => {
             addressCity,
             'user'
         );
-
-        if (req.session) {
-            req.session.user = {
-                _id: user._id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                role: user.role
-            };
+        if (user){
+            return res.status(200).json(user);
         }
-
-        return res.status(201).json(user);
     } catch (error) {
         const message = getErrorMessage(error);
         const lower = message.toLowerCase();
         if (lower.includes('already in use')) {
-            return res.status(409).json({ error: message });
+            return res.status(409).json({  error: message });
         }
         if (
             lower.includes('validation failed') ||
@@ -73,9 +56,11 @@ export const registerUser = async (req, res) => {
         ) {
             return res.status(400).json({ error: message });
         }
-        return res.status(500).json({ error: message });
+        return res.status(500).json({ error:message });
     }
 };
+
+
 
 // Admin promotes a user to admin
 export const promoteUser = async (req, res) => {
@@ -103,16 +88,16 @@ export const promoteUser = async (req, res) => {
     }
 };
 
+
+
+
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body || {};
-
         if (!email || !password) {
-            return res.status(400).json({ error: 'email and password are required' });
+            return res.status(400).json({ error:'email and password are required' });
         }
-
         const user = await usersData.authenticateUser(email, password);
-
         if (req.session) {
             req.session.user = {
                 _id: user._id,
@@ -122,13 +107,12 @@ export const loginUser = async (req, res) => {
                 role: user.role
             };
         }
-
         return res.status(200).json(user);
     } catch (error) {
         const message = getErrorMessage(error);
         const lower = message.toLowerCase();
         if (lower.includes('invalid email or password')) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(401).json({ error:'Invalid email or password' });
         }
         if (
             lower.includes('validation failed') ||
@@ -140,6 +124,9 @@ export const loginUser = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
+
+
+
 
 export const getCurrentUser = async (req, res) => {
     try {
@@ -161,6 +148,9 @@ export const getCurrentUser = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
+
+
+
 
 export const getUserById = async (req, res) => {
     try {
@@ -188,9 +178,7 @@ export const logoutUser = async (req, res) => {
     if (!req.session) {
         return res.status(200).json({ loggedOut: true });
     }
-
     const cookieName = 'AuthCookie';
-
     req.session.destroy((err) => {
         if (res.clearCookie) {
             res.clearCookie(cookieName);
@@ -202,18 +190,21 @@ export const logoutUser = async (req, res) => {
     });
 };
 
+
+
 export const addFavoriteParkForCurrentUser = async (req, res) => {
     try {
         if (!req.session || !req.session.user) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
-
         const { parkId } = req.params;
         if (!parkId) {
             return res.status(400).json({ error: 'parkId parameter is required' });
         }
-
         const result = await usersData.addFavoritePark(req.session.user._id, parkId);
+        if (result && result.favorite_Parks) {
+            req.session.user.favorite_Parks = result.favorite_Parks;
+        }
         return res.status(200).json(result);
     } catch (error) {
         const message = getErrorMessage(error);
@@ -227,19 +218,22 @@ export const addFavoriteParkForCurrentUser = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
+
+
 
 export const removeFavoriteParkForCurrentUser = async (req, res) => {
     try {
         if (!req.session || !req.session.user) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
-
         const { parkId } = req.params;
         if (!parkId) {
             return res.status(400).json({ error: 'parkId parameter is required' });
         }
-
         const result = await usersData.removeFavoritePark(req.session.user._id, parkId);
+        if (result && result.favorite_Parks) {
+            req.session.user.favorite_Parks = result.favorite_Parks;
+        }
         return res.status(200).json(result);
     } catch (error) {
         const message = getErrorMessage(error);
@@ -254,12 +248,13 @@ export const removeFavoriteParkForCurrentUser = async (req, res) => {
     }
 };
 
+
+
 export const getFavoriteParksForCurrentUser = async (req, res) => {
     try {
         if (!req.session || !req.session.user) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
-
         const parks = await usersData.getFavoriteParks(req.session.user._id);
         return res.status(200).json(parks);
     } catch (error) {

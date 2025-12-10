@@ -14,7 +14,6 @@ async function recalculateParkRating(parkId) {
         for (let review of parkReviews) { total += review.rating }
         r = Math.round(total / parkReviews.length * 100) / 100;
     }
-
     const updatedParks = { rating: r };
     const parksCollection = await parks();
     let updatedInfo = await parksCollection.findOneAndUpdate(
@@ -22,14 +21,14 @@ async function recalculateParkRating(parkId) {
         { $set:  updatedParks  },
         {returnDocument: 'after'}
     );
-
     if (!updatedInfo) {
         throw 'Could not update the park rating successfully';
     }
-        
     updatedInfo._id = updatedInfo._id.toString();
     return updatedInfo;        
 };
+
+
 
 const getReviewByReviewId = async (id) => {
     id = checkId(id, 'review ID');
@@ -39,6 +38,7 @@ const getReviewByReviewId = async (id) => {
     review._id = review._id.toString();
     return review;
 };
+
 
 const getReviewsByParkId = async (id) => {
     id = checkId(id, 'park ID');
@@ -53,9 +53,9 @@ const getReviewsByParkId = async (id) => {
         r.user_id = r.user_id.toString();
         r.park_id = r.park_id.toString();
     }
-    
     return reviewList;
 };
+
 
 const getReviewsByUserId = async (id) => {
     id = checkId(id, 'user ID');
@@ -67,9 +67,9 @@ const getReviewsByUserId = async (id) => {
         r.user_id = r.user_id.toString();
         r.park_id = r.park_id.toString();
     }
-    
     return reviewList;
 };
+
 
 const addReview = async (
     userId,
@@ -84,13 +84,11 @@ const addReview = async (
     const usersCollection = await users();
     const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
-
     const parksCollection = await parks();
     const park = await parksCollection.findOne({ _id: new ObjectId(parkId) });
     if(!park){
         throw `Could not find this park ID ( ${parkId} ) !`;
     }
-
     const reviewsCollection = await reviews();
     const reviewList = await reviewsCollection.find({ park_id: new ObjectId(parkId) }) .toArray();
     if (reviewList.length != 0) { 
@@ -100,7 +98,6 @@ const addReview = async (
             }
         }
     }
-
     let newReview = {
         user_id: new ObjectId(userId),
         park_id: new ObjectId(parkId),
@@ -109,18 +106,16 @@ const addReview = async (
         createdAt: new Date(),
         updatedAt: null
     };
-
     const insertInfo = await reviewsCollection.insertOne(newReview);
     if (!insertInfo.acknowledged || !insertInfo.insertedId){
         throw 'Could not add this review to the park';
     }  
-
     await recalculateParkRating(parkId);
-
     const addedReview = await getReviewByReviewId(insertInfo.insertedId.toString());
-
     return addedReview;
 };
+
+
 
 const updateReview = async (
     reviewId,
@@ -140,18 +135,15 @@ const updateReview = async (
             }},
         {returnDocument: 'after'}
     );
-
     if (!updatedInfo){
         throw 'Could not upgrade this review!';
     }  
-
     await recalculateParkRating(updatedInfo.park_id.toString());
-
     updatedInfo._id = updatedInfo._id.toString();
-
     return updatedInfo;
-
 }
+
+
 
 
 const deleteReviewByReviewId = async (
@@ -161,17 +153,12 @@ const deleteReviewByReviewId = async (
     await getReviewByReviewId(reviewId);
     const reviewsCollection = await reviews();
     const deletionInfo = await reviewsCollection.findOneAndDelete({_id: new ObjectId(reviewId)});
-
     if (!deletionInfo) {
         throw `Could not delete the review with id (${reviewId})`;
     }
-
     await recalculateParkRating(deletionInfo.park_id.toString());
-
     const deletedComment = await deleteCommentByReviewID(reviewId)
-
     return {review_id: deletionInfo._id.toString(), deleted_comments_count: deletedComment.deleted_number, deleted: true};
-
 }
 
 

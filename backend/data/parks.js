@@ -289,16 +289,15 @@ export const createPark = async (park_name, park_location, park_zip, description
     
     const parksCollection = await parks();
     
-    const existingPark = await parksCollection.findOne({
-      park_name: { $regex: new RegExp(`^${trimmedParkName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
-    });
+    const existingPark = await parksCollection.findOne(
+     { park_name: trimmedParkName.toLowerCase() });
     
     if (existingPark) {
       throw 'A park with this name already exists';
     }
     
     const newPark = {
-      park_name: trimmedParkName,
+      park_name: trimmedParkName.toLowerCase(),
       park_location: validatedLocation,
       park_zip: validatedZip,
       description: trimmedDescription,
@@ -349,7 +348,7 @@ export const updatePark = async (parkId, updateData) => {
       try {
         const trimmedParkName = validateParkName(trimString(updateData.park_name));
         const duplicatePark = await parksCollection.findOne({
-          park_name: { $regex: new RegExp(`^${trimmedParkName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+          park_name: trimmedParkName.toLowerCase()  ,
           _id: { $ne: new ObjectId(trimmedId) }
         });
         if (duplicatePark) {
@@ -517,49 +516,4 @@ export const deletePark = async (parkId) => {
   }
 };
 
-export const reParkRating = async (parkId) => {
-  try {
-    let trimmedId;
-    try {
-      trimmedId = validateObjectId(parkId);
-    } catch (error) {
-      throw new Error(`Park ID validation failed: ${error.message || error}`);
-    }
-    
-    const parksCollection = await parks();
-    const reviewCollection = await review();
-    
-    const park = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
-    if (!park) {
-      throw 'No park found with that ID';
-    }
-    
-    const parkReviews = await reviewCollection.find({ park_id: new ObjectId(trimmedId) }).toArray();
-    
-    let newRating = 0;
-    if (parkReviews.length > 0) {
-      const sum = parkReviews.reduce((acc, review) => {
-        return acc + (review.rating || 0);
-      }, 0);
-      newRating = sum / parkReviews.length;
-      newRating = Math.round(newRating * 10) / 10;
-    }
-    
-    const updateInfo = await parksCollection.updateOne(
-      { _id: new ObjectId(trimmedId) },
-      { $set: { rating: newRating } }
-    );
-    
-    if (updateInfo.modifiedCount === 0 && parkReviews.length > 0) {
-      throw 'Could not update park rating';
-    }
-    
-    const updatedPark = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
-    return convertParkObjectIds(updatedPark);
-  } catch (error) {
-    if (error.message && error.message.includes('Failed to connect to database')) {
-      throw error;
-    }
-    throw new Error(`Error recalculating park rating: ${error.message || error}`);
-  }
-};
+
