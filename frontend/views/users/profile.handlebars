@@ -1,23 +1,20 @@
 <h1>User Profile</h1>
 
 <div class="profile-info">
-  <h2>{{user.firstName}} {{user.lastName}}</h2>
-  <p><strong>Email:</strong> {{user.email}}</p>
-  <p><strong>Address:</strong> {{user.addressCity}}, {{user.addressZip}}</p>
+  <h2 id="profile-name">Loading...</h2>
+
+  <p id="profile-email"><strong>Email:</strong> </p>
+  <p id="profile-address"><strong>Address:</strong> </p>
 </div>
 
 <div class="favorites-section">
   <h2>Favorite Parks</h2>
-  {{#if favorites.length}}
-    <ul class="favorites-list">
-      {{#each favorites}}
-        <li>
-          <a href="/parks/{{id}}">{{name}}</a> - {{location}} (Rating: {{rating}}/5.0)
-        </li>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p>No favorite parks yet.</p>
-  {{/if}}
+
+  <ul id="favorites-list" class="favorites-list"></ul>
+
+  <p id="no-favorites-message" style="display:none;">No favorite parks yet.</p>
 </div>
+
+<script src="/public/js/profile.js"></script>
+
 
