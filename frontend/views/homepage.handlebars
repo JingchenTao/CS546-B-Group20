@@ -1,29 +1,93 @@
-<h1>City Park Explorer</h1>
+<div class="home-page">
 
-<div>
-    <input type="text" placeholder="Search parks...">
-    <button>Search</button>
+  <!-- Hero -->
+  <section class="home-hero">
+    <div class="home-hero-inner">
+
+      <!-- LEFT -->
+      <div class="hero-text">
+        <div class="brand-pill">
+          <span class="brand-icon">🌿</span>
+          <span class="brand-name">City Park Explorer</span>
+        </div>
+
+        <h1 class="hero-title">
+          Find your next<br />
+          favorite city park
+        </h1>
+
+        <p class="hero-subtitle">
+          Discover green spaces, read reviews, and save your favorite parks
+          in one cozy little place.
+        </p>
+
+        <!-- search bar -->
+        <form class="hero-search" action="/parks" method="get">
+          <input
+            type="text"
+            name="q"
+            placeholder="Search parks..."
+            aria-label="Search parks"
+          />
+          <button type="submit">Search</button>
+        </form>
+
+        <!-- buttons -->
+        <div class="hero-actions">
+          <a href="/parks" class="btn btn-primary">Explore Parks</a>
+          <a href="/users/register" class="btn btn-ghost">Join now</a>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-bg-mountain"></div>
+        <div class="hero-bg-hill"></div>
+
+        <div class="hero-character">
+          <div class="hero-head"></div>
+          <div class="hero-body"></div>
+          <div class="hero-stick"></div>
+        </div>
+
+        <div class="hero-tree hero-tree-1"></div>
+        <div class="hero-tree hero-tree-2"></div>
+
+        <div class="hero-sun"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Featured Parks -->
+  <section class="featured-section">
+    <h2 class="featured-title">Featured Parks</h2>
+
+    <div class="featured-grid">
+      <article class="park-card">
+        <h3 class="park-name">Central Park</h3>
+        <p class="park-location">New York, NY</p>
+        <p class="park-description">
+          A beautiful park in the heart of the city.
+        </p>
+      </article>
+
+      <article class="park-card">
+        <h3 class="park-name">Golden Gate Park</h3>
+        <p class="park-location">San Francisco, CA</p>
+        <p class="park-description">
+          One of the most visited parks in the country.
+        </p>
+      </article>
+
+      <article class="park-card">
+        <h3 class="park-name">Lincoln Park</h3>
+        <p class="park-location">Chicago, IL</p>
+        <p class="park-description">
+          A great place to relax and enjoy nature.
+        </p>
+      </article>
+    </div>
+  </section>
+
 </div>
-
-<h2>Featured Parks</h2>
-
-<div>
-    <div>
-        <h3>Central Park</h3>
-        <p>Location: New York, NY</p>
-        <p>A beautiful park in the heart of the city.</p>
-    </div>
-
-    <div>
-        <h3>Golden Gate Park</h3>
-        <p>Location: San Francisco, CA</p>
-        <p>One of the most visited parks in the country.</p>
-    </div>
-
-    <div>
-        <h3>Lincoln Park</h3>
-        <p>Location: Chicago, IL</p>
-        <p>A great place to relax and enjoy nature.</p>
-    </div>
-</div>
-
