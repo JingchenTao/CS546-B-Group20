@@ -1,0 +1,228 @@
+/* Layout */
+.parks-list-wrapper,
+.page-wrapper {
+  padding: 50px 20px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(#e9f9ef, #eefcf8);
+  min-height: 100vh;
+  font-family: "Inter", sans-serif;
+}
+
+/* BG */
+.parks-list-wrapper::before,
+.parks-list-wrapper::after,
+.page-wrapper::before,
+.page-wrapper::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  background: #d7f3de;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.65;
+}
+
+/* Left blob */
+.parks-list-wrapper::before,
+.page-wrapper::before {
+  width: 320px;
+  height: 320px;
+  top: 80px;
+  left: -140px;
+}
+
+/* Right blob */
+.parks-list-wrapper::after,
+.page-wrapper::after {
+  width: 380px;
+  height: 380px;
+  bottom: -120px;
+  right: -160px;
+}
+
+.parks-hero,
+.parks-grid,
+.park-detail-header,
+.park-detail-card,
+.reviews-section {
+  position: relative;
+  z-index: 2;
+}
+
+/* Hero Section */
+.parks-hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.parks-hero h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #2c593a;
+}
+
+.parks-hero .subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+/* Search */
+
+.parks-search input {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid #cde9d6;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.15s ease;
+}
+
+.parks-search input:focus {
+  border-color: #79c895;
+  box-shadow: 0 0 0 3px rgba(90, 150, 255, 0.18);
+}
+
+
+.parks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 26px;
+}
+
+/* Card Styling */
+.park-card {
+  background: #ffffffcc; /* slight transparency */
+  backdrop-filter: blur(8px);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.09);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  text-decoration: none;
+}
+
+.park-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+}
+
+.park-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c593a;
+  margin-bottom: 6px;
+}
+
+.location,
+.rating {
+  margin: 6px 0;
+  color: #444;
+}
+
+/* Buttons */
+.details-btn,
+.cute-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 16px;
+  background: #7fd4a2;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.18s ease;
+}
+
+.details-btn:hover,
+.cute-btn:hover {
+  background: #6bb687;
+}
+
+/* Detail */
+.park-detail-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.park-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #2c593a;
+}
+
+.park-type {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.park-detail-card {
+  background: #ffffffcc;
+  backdrop-filter: blur(8px);
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  margin-bottom: 40px;
+}
+
+.park-detail-card h2 {
+  margin-bottom: 14px;
+  font-weight: 600;
+  color: #2c593a;
+}
+
+/* Review */
+.reviews-section {
+  margin-top: 20px;
+}
+
+.reviews-title {
+  margin-bottom: 16px;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2c593a;
+}
+
+.review-card {
+  background: #ffffffcc;
+  backdrop-filter: blur(8px);
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+.review-user {
+  margin: 0 0 6px 0;
+  font-weight: 600;
+  color: #2c593a;
+}
+
+.review-rating {
+  margin: 0;
+}
+
+.review-comment {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.review-date {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+
+@media (max-width: 550px) {
+  .park-card {
+    padding: 20px;
+  }
+
+  .parks-hero h1 {
+    font-size: 2rem;
+  }
+}

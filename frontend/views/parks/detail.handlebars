@@ -1,7 +1,12 @@
-<div class="park-detail">
-  <h1>{{park.name}}</h1>
-  
-  <div class="park-info">
+<div class="page-wrapper">
+
+  <div class="park-detail-header">
+    <h1 class="park-title">{{park.name}}</h1>
+    <p class="park-type">{{park.type}}</p>
+  </div>
+
+  <div class="park-detail-card">
+    <h2>Park Information</h2>
     <p><strong>Description:</strong> {{park.description}}</p>
     <p><strong>Type:</strong> {{park.type}}</p>
     <p><strong>Zip Codes:</strong> {{park.zipCodes}}</p>
@@ -9,16 +14,17 @@
   </div>
 
   <div class="reviews-section">
-    <h2>Reviews</h2>
+    <h2 class="reviews-title">Reviews</h2>
+
     {{#each reviews}}
-      <div class="review-item">
-        <h3>{{userName}}</h3>
-        <p><strong>Rating:</strong> {{rating}}/5.0</p>
-        <p>{{comment}}</p>
+      <div class="review-card">
+        <h3 class="review-user">{{userName}}</h3>
+        <p class="review-rating"><strong>Rating:</strong> {{rating}}/5.0</p>
+        <p class="review-comment">{{comment}}</p>
         <p class="review-date">{{date}}</p>
       </div>
     {{/each}}
+
   </div>
 </div>
-
 

@@ -1,14 +1,22 @@
-<h1>Parks List</h1>
+<div class="parks-list-wrapper">
 
-<div class="parks-container">
-  {{#each parks}}
-    <div class="park-item">
-      <h2>{{name}}</h2>
-      <p><strong>Location:</strong> {{location}}</p>
-      <p><strong>Rating:</strong> {{rating}}/5.0</p>
-      <a href="/parks/{{id}}" class="view-details-btn">View Details</a>
-    </div>
-  {{/each}}
+  <div class="parks-hero">
+    <h1>Parks List</h1>
+    <p class="subtitle">Browse parks and discover outdoor spaces to explore.</p>
+  </div>
+
+  <div class="parks-grid">
+    {{#each parks}}
+      <div class="park-card cute">
+        <h2 class="park-name">{{name}}</h2>
+        <p class="location"><strong>Location:</strong> {{location}}</p>
+        <p class="rating"><strong>Rating:</strong> {{rating}}/5.0</p>
+
+        <a href="/parks/{{id}}" class="details-btn cute-btn">View Details</a>
+      </div>
+    {{/each}}
+  </div>
+
 </div>
 
 
