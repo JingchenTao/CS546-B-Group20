@@ -105,39 +105,6 @@ const constructorMethod = (app) => {
     res.render('users/register');
   });
 
-  app.get('/users/me', (req, res) => {
-    const fakeUser = {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      addressCity: 'New York',
-      addressZip: '10001'
-    };
-
-    const fakeFavorites = [
-      {
-        id: '1',
-        name: 'Central Park',
-        location: 'New York, NY',
-        rating: 4.8
-      },
-      {
-        id: '2',
-        name: 'Golden Gate Park',
-        location: 'San Francisco, CA',
-        rating: 4.7
-      },
-      {
-        id: '3',
-        name: 'Lincoln Park',
-        location: 'Chicago, IL',
-        rating: 4.6
-      }
-    ];
-
-    res.render('users/profile', { user: fakeUser, favorites: fakeFavorites });
-  });
-
   app.use('/parks', parksRoutes);
   app.use('/users', usersRoutes);
   app.use('/reviews', reviewsRoutes);

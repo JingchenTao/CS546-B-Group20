@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Get registration
 router.get('/register', (req, res) => {
-    res.render('register',{title: 'register'});
+    res.render('users/register',{title: 'register'});
 })
 
 // Post registration
@@ -15,7 +15,7 @@ router.post('/register', usersController.registerUser);
 
 // get login
 router.get('/login', (req, res) => {
-    res.render('login',{title: 'login'});
+    res.render('users/login',{title: 'login'});
 })
 
 // Login
@@ -26,7 +26,7 @@ router.post('/login', usersController.loginUser);
 
 // for the user profile
 router.get('/userProfile', (req, res) => {
-    res.render('profile',{title: 'profile'});
+    res.render('users/profile', { title: 'profile' });
 })
 
 
@@ -52,7 +52,7 @@ router.post('/admin/role', adminAuthMiddleware, usersController.promoteUser);
 
 // get logout
 router.get('/logout', (req, res) => {
-    res.render('logout',{title: 'logout'});
+    res.render('users/logout',{title: 'logout'});
 })
 
 // Logout
