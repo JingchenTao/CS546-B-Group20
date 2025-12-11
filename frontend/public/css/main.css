@@ -1,45 +1,284 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
+/* Layout */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #1f4b35;
+  background-color: #e7f9ec;
+}
+
+main {
+  min-height: calc(100vh - 80px);
+}
+
+/* Navigation */
 nav {
-    background-color: #f0f0f0;
-    padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.8rem 2.5rem;
+  background-color: #e7f9ec;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  font-size: 0.95rem;
 }
 
 nav a {
-    margin-right: 20px;
-    text-decoration: none;
-    color: #333;
+  text-decoration: none;
+  color: #245b3e;
+  opacity: 0.85;
+  transition: opacity 0.15s ease, transform 0.1s ease;
 }
 
 nav a:hover {
-    color: #007bff;
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
+/* Footer */
 footer {
-    background-color: #f0f0f0;
-    padding: 10px;
-    text-align: center;
-    margin-top: 20px;
+  padding: 0.75rem 2.5rem 1.25rem;
+  text-align: left;
+  font-size: 0.85rem;
+  color: #4d7c5e;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-div {
-    margin: 20px;
+/* Home page */
+.home-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 2.75rem;
 }
 
-h1 {
-    text-align: center;
+/* Hero */
+.home-hero {
+  margin-bottom: 2.25rem;
 }
 
-input[type="text"] {
-    padding: 8px;
-    width: 300px;
+.home-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 2.5rem;
+  align-items: center;
 }
 
-button {
-    padding: 8px 15px;
-    margin-left: 10px;
+/* Left */
+.hero-text {
+  max-width: 520px;
 }
 
+.brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background-color: #d3f3df;
+  font-size: 0.85rem;
+  color: #236142;
+  margin-bottom: 0.9rem;
+}
+
+.hero-title {
+  margin: 0 0 0.6rem;
+  font-size: 2.4rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  margin: 0 0 1.1rem;
+  font-size: 0.98rem;
+  color: #456f54;
+}
+
+/* Search bar */
+.hero-search {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 1rem;
+  max-width: 440px;
+}
+
+.hero-search input {
+  flex: 1;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px 0 0 999px;
+  border: 1px solid #b9e4c8;
+  font-size: 0.95rem;
+}
+
+.hero-search button {
+  padding: 0 1.4rem;
+  border-radius: 0 999px 999px 0;
+  border: none;
+  background-color: #2f8f57;
+  color: white;
+  cursor: pointer;
+}
+
+/* Buttons */
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: #2f8f57;
+  color: white;
+}
+
+.btn-ghost {
+  border: 1px solid #97d8ad;
+  color: #2f8f57;
+}
+
+/* Right */
+
+.hero-art {
+  position: relative;
+  width: 420px;
+  height: 300px;
+}
+
+/* Mountain */
+.hero-bg-mountain {
+  position: absolute;
+  width: 260px;
+  height: 160px;
+  background: #a3d8b5;
+  border-radius: 30px;
+  bottom: 0;
+  left: 20px;
+}
+
+/* Hill */
+.hero-bg-hill {
+  position: absolute;
+  width: 180px;
+  height: 90px;
+  background: #8fcfa4;
+  border-radius: 40px;
+  bottom: 25px;
+  right: 20px;
+}
+
+/* Character */
+.hero-character {
+  position: absolute;
+  bottom: 10px;
+  left: 140px;
+}
+
+.hero-head {
+  width: 55px;
+  height: 55px;
+  background: #ffe1b0;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.hero-body {
+  width: 70px;
+  height: 100px;
+  background: #4ba876;
+  border-radius: 10px;
+  margin: -8px auto 0 auto;
+}
+
+.hero-stick {
+  width: 8px;
+  height: 90px;
+  background: #c49d6b;
+  margin: 0 auto;
+}
+
+/* Trees */
+.hero-tree {
+  position: absolute;
+  width: 40px;
+  height: 80px;
+  background: #3d7f59;
+  border-radius: 20px;
+}
+
+.hero-tree-1 {
+  bottom: 5px;
+  left: 50px;
+}
+
+.hero-tree-2 {
+  bottom: 30px;
+  right: 70px;
+}
+
+/* Sun */
+.hero-sun {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  width: 55px;
+  height: 55px;
+  background: #ffe27a;
+  border-radius: 50%;
+}
+
+/* Featured Parks */
+.featured-section {
+  margin-top: 1.5rem;
+}
+
+.featured-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin: 0 0 1.3rem;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.park-card {
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 1.6rem;
+  box-shadow: 0 10px 28px rgba(28, 108, 72, 0.12);
+}
+
+@media (max-width: 900px) {
+  .home-hero-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scale */
+.hero-art {
+  transform: scale(1.20);  
+  transform-origin: center;
+  position: relative;
+  top: -30px;   
+  right: -40px; 
+}
+.hero-sun {
+  width: 80px;
+  height: 80px;
+}
