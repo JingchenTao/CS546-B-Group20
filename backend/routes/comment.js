@@ -218,6 +218,9 @@ router
         return res.status(200).json(commentInfo);
   
       } catch (e) {
+        if (typeof e === 'string' && e.includes('already commented this comment')) {
+          return res.status(409).json({ error: e });
+        }
         return res.status(500).json({error: 'Internal server error!'});
       }
   
@@ -239,6 +242,9 @@ router
         commentInfo = await commentMethod.getCommentsByUserId(req.params.userId);
         return res.status(200).json(commentInfo);
       } catch (e) {
+        if (typeof e === 'string' && e.includes('No user with this user ID')) {
+          return res.status(409).json({ error: e });
+        }
         return res.status(500).json({error: 'Internal server error!'});
       }
      

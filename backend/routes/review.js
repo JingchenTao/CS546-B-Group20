@@ -178,7 +178,6 @@ router
     
     try {
       await reviewMethod.getReviewsByParkId(req.params.parkId);
-
     } catch (e) {
       if (typeof e === 'string' && e.includes('No park with this park ID')) {
         return res.status(404).json({ error: 'Not found this park id!' });
@@ -190,11 +189,9 @@ router
     let reviewInfo;
     try {
       reviewInfo = await reviewMethod.addReview(userId, req.params.parkId, reviewData.rating, reviewData.review_content);
-
-      
-
+      return res.status(200).json(reviewInfo);
     } catch (e) {
-      if (typeof e === 'string' && e.includes('Duplicate reviews are not allowed')) {
+      if (typeof e === 'string' && e.includes('Cannot review the same park twice')) {
         return res.status(409).json({ error: e });
       }
       return res.status(500).json({error: 'Internal server error!'});
@@ -218,6 +215,9 @@ router
       reviewInfo = await reviewMethod.getReviewsByUserId(req.params.userId);
       return res.status(200).json(reviewInfo);
     } catch (e) {
+      if (typeof e === 'string' && e.includes('No user with this user ID')) {
+        return res.status(404).json({ error: 'User not found' });
+      }
       return res.status(500).json({error: 'Internal server error!'});
     }
   })
