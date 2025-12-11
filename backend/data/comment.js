@@ -16,6 +16,9 @@ const getCommentByCommentId = async (commentId) => {
 
 const getCommentsByReviewId = async (reviewId) => {
     reviewId = checkId(reviewId, 'review ID');
+    const reviewsCollection = await reviews();
+    const review = await reviewsCollection.findOne({_id: new ObjectId(reviewId)});
+    if (!review) {throw `No review with this review ID ( ${reviewId} )!`;}
     const commentsCollection = await comments();
     const commentsList = await commentsCollection.find({ review_id: new ObjectId(reviewId) }) .toArray();
     if (commentsList.length === 0) { return []; }
@@ -29,6 +32,9 @@ const getCommentsByReviewId = async (reviewId) => {
 
 const getCommentsByUserId = async (userId) => {
     userId = checkId(userId, 'user ID');
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({_id: new ObjectId(userId)});
+    if (!user) {throw `No user with this user ID ( ${userId} )!`;}
     const commentsCollection = await comments();
     const commentsList = await commentsCollection.find({ user_id: new ObjectId(userId) }) .toArray();
     if (commentsList.length === 0) { return []; }
@@ -136,6 +142,7 @@ const deleteCommentByReviewID = async (
     reviewId
 ) =>   {
     reviewId = checkId(reviewId, 'review id');
+
     let commentsList = await getCommentsByReviewId(reviewId);
     const commentsCollection = await comments();
     const deleteInfo = await commentsCollection.deleteMany({ review_id: new ObjectId(reviewId) });

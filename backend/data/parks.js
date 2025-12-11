@@ -238,7 +238,6 @@ export const getRecommendParks = async ({ zipcode, location }) => {
       const parksList = await getAllParks(undefined, trimmedLocation, undefined, undefined, undefined, 'rating_desc');
       return parksList.slice(0, 10);
     }
-    
     return await getPopularParks(10);
   } catch (error) {
     if (error.message && error.message.includes('Failed to connect to database')) {
@@ -393,7 +392,7 @@ export const updatePark = async (parkId, updateData) => {
     }
     
     if (updateData.rating !== undefined) {
-      throw 'Rating cannot be modified directly. Use reParkRating() to update rating.';
+      throw 'Rating cannot be modified directly.';
     }
     
     if (Object.keys(updateObj).length === 0) {

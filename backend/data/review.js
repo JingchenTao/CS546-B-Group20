@@ -2,19 +2,20 @@ import {parks, users, reviews } from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import { checkId, checkIsProperRate, checkIsProperReview } from '../controllers/review.js';
 import { deleteCommentByReviewID } from './comment.js';
+import { getParkById } from './parks.js';
 
 
 async function recalculateParkRating(parkId) {
     parkId = checkId(parkId, 'park ID');
-    const reviewsCollection = await reviews();
-    const parkReviews = await reviewsCollection.find({ park_id: new ObjectId(parkId) }).toArray();
+    let parkReviews = await getReviewsByParkId(parkId);
     let r = 0;
     if (parkReviews.length !== 0) {
         let total = 0;
         for (let review of parkReviews) { total += review.rating }
         r = Math.round(total / parkReviews.length * 100) / 100;
     }
-    const updatedParks = { rating: r };
+    let reviewCount = parkReviews.length;
+    const updatedParks = { rating: r, reviewCount: reviewCount};
     const parksCollection = await parks();
     let updatedInfo = await parksCollection.findOneAndUpdate(
         { _id: new ObjectId(parkId) },
@@ -60,6 +61,9 @@ const getReviewsByParkId = async (id) => {
 const getReviewsByUserId = async (id) => {
     id = checkId(id, 'user ID');
     const reviewsCollection = await reviews();
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({_id: new ObjectId(id)});
+    if (!user) {throw `No user with this user ID ( ${id} )!`;}
     const reviewList = await reviewsCollection.find({ user_id: new ObjectId(id) }) .toArray();
     if (reviewList.length === 0) { return []; }
     for(let r of reviewList){
@@ -84,20 +88,10 @@ const addReview = async (
     const usersCollection = await users();
     const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
-    const parksCollection = await parks();
-    const park = await parksCollection.findOne({ _id: new ObjectId(parkId) });
-    if(!park){
-        throw `Could not find this park ID ( ${parkId} ) !`;
-    }
+    await getParkById(parkId);
     const reviewsCollection = await reviews();
-    const reviewList = await reviewsCollection.find({ park_id: new ObjectId(parkId) }) .toArray();
-    if (reviewList.length != 0) { 
-        for(let r of reviewList){
-            if( r.user_id.toString() === userId){
-                throw `User( ${userId} ) has already reviewed this park( ${parkId} ). Duplicate reviews are not allowed. Please edit the existing review!`; 
-            }
-        }
-    }
+    const reviewList = await reviewsCollection.findOne({ park_id: new ObjectId(parkId), user_id: new ObjectId(userId)});
+    if (reviewList) { throw 'Cannot review the same park twice!'}
     let newReview = {
         user_id: new ObjectId(userId),
         park_id: new ObjectId(parkId),
@@ -111,6 +105,7 @@ const addReview = async (
         throw 'Could not add this review to the park';
     }  
     await recalculateParkRating(parkId);
+
     const addedReview = await getReviewByReviewId(insertInfo.insertedId.toString());
     return addedReview;
 };
@@ -125,7 +120,7 @@ const updateReview = async (
     reviewId = checkId(reviewId, 'review ID');
     newRating = checkIsProperRate(newRating, 'new rating');
     newContent = checkIsProperReview(newContent, 'new review content');
-    let oldreview = await getReviewByReviewId(reviewId);
+    let currentReview = await getReviewByReviewId(reviewId);
     const reviewsCollection = await reviews();
     const updatedInfo = await reviewsCollection.findOneAndUpdate(
         {_id: new ObjectId(reviewId)},
@@ -138,7 +133,7 @@ const updateReview = async (
     if (!updatedInfo){
         throw 'Could not upgrade this review!';
     }  
-    await recalculateParkRating(updatedInfo.park_id.toString());
+    await recalculateParkRating(currentReview.park_id.toString());
     updatedInfo._id = updatedInfo._id.toString();
     return updatedInfo;
 }
@@ -150,14 +145,14 @@ const deleteReviewByReviewId = async (
     reviewId
 ) =>   {
     reviewId = checkId(reviewId, 'review ID');
-    await getReviewByReviewId(reviewId);
+    let currentReview =  await getReviewByReviewId(reviewId);
     const reviewsCollection = await reviews();
     const deletionInfo = await reviewsCollection.findOneAndDelete({_id: new ObjectId(reviewId)});
     if (!deletionInfo) {
         throw `Could not delete the review with id (${reviewId})`;
     }
-    await recalculateParkRating(deletionInfo.park_id.toString());
-    const deletedComment = await deleteCommentByReviewID(reviewId)
+    await recalculateParkRating(currentReview.park_id.toString());
+    let deletedComment = await deleteCommentByReviewID(reviewId);
     return {review_id: deletionInfo._id.toString(), deleted_comments_count: deletedComment.deleted_number, deleted: true};
 }
 

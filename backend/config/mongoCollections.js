@@ -16,6 +16,7 @@ const usersCol = getCollectionFn('users');
 const parksCol = getCollectionFn('parks');
 const reviewCol = getCollectionFn('review');
 const commentCol = getCollectionFn('comment');
+const historyCol = getCollectionFn('histories');
 
 export const users = usersCol;
 export const parks = parksCol;
@@ -23,4 +24,5 @@ export const review = reviewCol;
 export const reviews = reviewCol;
 
 export const comment = commentCol;
-export const comments = commentCol;
+export const comments = commentCol
+export const histories = historyCol;
