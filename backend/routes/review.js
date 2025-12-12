@@ -100,6 +100,11 @@ router
       return res.status(400).json({error: 'There are no fields in the request body'});
     }
     try {
+
+
+      reviewData.rating = Number(reviewData.rating); //frontend 
+
+
       reviewData.rating = helper.checkIsProperRate(reviewData.rating, 'rating');
       reviewData.review_content = helper.checkIsProperReview(reviewData.review_content, 'new review content');
     } catch (e) {
@@ -169,6 +174,10 @@ router
     }
 
     try {
+
+      reviewData.rating = Number(reviewData.rating); //frontend
+
+
       reviewData.rating = helper.checkIsProperRate(reviewData.rating, 'rating');
       reviewData.review_content = helper.checkIsProperReview(reviewData.review_content, 'new review content');
     } catch (e) {
@@ -189,7 +198,11 @@ router
     let reviewInfo;
     try {
       reviewInfo = await reviewMethod.addReview(userId, req.params.parkId, reviewData.rating, reviewData.review_content);
-      return res.status(200).json(reviewInfo);
+      
+      //frontend update
+      return res.redirect(`/parks/${req.params.parkId}`);
+
+
     } catch (e) {
       if (typeof e === 'string' && e.includes('Cannot review the same park twice')) {
         return res.status(409).json({ error: e });
