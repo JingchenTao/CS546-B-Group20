@@ -1,10 +1,10 @@
 <div class="page-wrapper">
-
   <div class="park-detail-header">
     <h1 class="park-title">{{park.park_name}}</h1>
     <p class="park-type">{{park.park_type}}</p>
   </div>
 
+  <!-- Park Info -->
   <div class="park-detail-card">
     <h2>Park Information</h2>
 
@@ -24,11 +24,59 @@
     </p>
 
     <p>
-      <strong>Rating:</strong>
+      <strong>Average Rating:</strong>
       {{park.rating}} / 5.0
     </p>
+
+    {{#if user}}
+      <button
+        type="button"
+        class="favorite-btn"
+        id="favorite-btn"
+        data-park-id="{{park._id}}">
+        ❤️ Add / Remove Favorite
+      </button>
+    {{/if}}
   </div>
 
+  <!-- Facility Info-->
+  <div class="park-detail-card">
+    <h2>Facility Details</h2>
+
+    <ul class="facility-list">
+      <li>
+        <strong>Park Category:</strong> {{park.park_type}}
+      </li>
+      <li>
+        <strong>Facilities & Usage:</strong>
+        {{#if park.description}}
+          This park offers facilities and features as described above.
+        {{else}}
+          Facility details are not available.
+        {{/if}}
+      </li>
+    </ul>
+  </div>
+
+  <div class="park-detail-card">
+    <h2>Explore Similar Parks</h2>
+
+    <ul class="related-links">
+      <li>
+        <a href="/parks?type={{park.park_type}}">
+          View other {{park.park_type}} parks
+        </a>
+      </li>
+
+      <li>
+        <a href="/parks?zipcode={{park.park_zip}}">
+          View parks in the same area
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Reviews -->
   <div class="reviews-section">
     <h2 class="reviews-title">Reviews</h2>
 
@@ -49,26 +97,30 @@
     {{else}}
       <p>No reviews yet.</p>
     {{/if}}
-
   </div>
 
-<h3 class="review-form-title">Add a Review</h3>
+  <h3 class="review-form-title">Add a Review</h3>
 
-<form class="review-form-card" method="POST" action="/reviews/park/{{park._id}}">
-  <div class="form-group">
-    <label for="rating">Rating</label>
-    <input type="number" name="rating" min="1" max="5" required>
-  </div>
+  <form class="review-form-card" method="POST" action="/reviews/park/{{park._id}}">
+    <div class="form-group">
+      <label for="rating">Rating</label>
+      <input type="number" name="rating" min="1" max="5" required>
+    </div>
 
-  <div class="form-group">
-    <label for="comment">Comment</label>
-    <textarea name="review_content" rows="3" required></textarea>
-  </div>
+    <div class="form-group">
+      <label for="comment">Comment</label>
+      <textarea name="review_content" rows="3" required></textarea>
+    </div>
 
-  <button type="submit" class="submit-review-btn">Submit Review</button>
-</form>
+    <button type="submit" class="submit-review-btn">
+      Submit Review
+    </button>
+  </form>
 
 </div>
 
+<!-- Scripts -->
 <script src="/public/js/parkDetail.js"></script>
+<script src="/public/js/review.js"></script>
+<script src="/public/js/favorite.js"></script>
 
