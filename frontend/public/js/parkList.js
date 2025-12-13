@@ -38,7 +38,7 @@
     }
   };
 
-  fetchParks({ limit: 20 });
+  fetchParks( );
 
   // search/filter/sort
   if (form) {
@@ -54,7 +54,6 @@
         }
       }
 
-      params.limit = 20; 
       fetchParks(params);
     });
   }

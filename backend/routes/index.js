@@ -24,9 +24,7 @@ const constructorMethod = (app) => {
       'rating_desc'
     );
 
-    const parks = allParks.slice(0, 20);
-
-    res.render('parks/list', { parks });
+    res.render('parks/list', { parks: allParks });
   } catch (e) {
     res.status(500).render('error', { error: e });
   }

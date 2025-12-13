@@ -3,12 +3,11 @@ import { ObjectId } from 'mongodb';
 
 export const getAllParks = async (req, res) => {
   try {
-    const { search, location, type, zipcode, minRating, sort, limit} = req.query;
+    const { search, location, type, zipcode, minRating, sort} = req.query;
     
     const parksList = await parksData.getAllParks(search, location, type, zipcode, minRating, sort);
     
-    const max = Number(limit) && Number(limit) > 0 ? Number(limit) : 20;
-    res.status(200).json(parksList.slice(0, max));
+    res.status(200).json(parksList);
 
     
   } catch (error) {
