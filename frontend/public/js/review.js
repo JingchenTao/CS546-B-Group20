@@ -60,3 +60,33 @@ document.addEventListener('DOMContentLoaded', () => {
     form.appendChild(div);
   }
 });
+
+document.addEventListener('submit', async (e) => {
+
+  if (!e.target.classList.contains('delete-review-form')) return;
+
+  e.preventDefault(); 
+
+  const url = e.target.action;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST', // 让 app.js rewrite 成 DELETE
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || 'Failed to delete review.');
+      return;
+    }
+
+    window.location.reload();
+
+  } catch (err) {
+    console.error(err);
+    alert('Network error while deleting review.');
+  }
+});

@@ -182,6 +182,7 @@
                     <form
                       method="POST"
                       action="/comments/{{_id}}?_method=DELETE"
+                      class="delete-comment-form"
                     >
                       <button type="submit" class="delete-btn">
                         Delete
@@ -198,7 +199,7 @@
         {{#if ../user}}
           <form
             method="POST"
-            action="/reviews/{{_id}}/comments"
+            action="/comments/review/{{_id}}"
             class="comment-form"
           >
             <div class="form-group">
@@ -247,5 +248,6 @@
 <!-- Scripts -->
 <script src="/public/js/parkDetail.js"></script>
 <script src="/public/js/review.js"></script>
+<script src="/public/js/comment.js"></script>
 <script src="/public/js/favorite.js"></script>
 
