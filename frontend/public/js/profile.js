@@ -45,21 +45,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     const noFavoritesMessage = document.getElementById('no-favorites-message');
 
     if (favoritesList && noFavoritesMessage) {
-      if (!user.favorite_Parks || user.favorite_Parks.length === 0) {
-        noFavoritesMessage.style.display = 'block';
-        favoritesList.style.display = 'none';
-      } else {
-        noFavoritesMessage.style.display = 'none';
-        favoritesList.style.display = 'block';
-        favoritesList.innerHTML = '';
+      try {
+      const favRes = await fetch('/users/me/favorites', {
+      method: 'GET',
+      credentials: 'include'
+    });
 
-        user.favorite_Parks.forEach((parkId) => {
-          const li = document.createElement('li');
-          li.textContent = parkId || 'Park ID not available';
-          favoritesList.appendChild(li);
-        });
-      }
+    if (!favRes.ok) {
+      throw new Error('Failed to fetch favorite parks');
     }
+
+    const favoriteParks = await favRes.json();
+
+    if (!favoriteParks || favoriteParks.length === 0) {
+      noFavoritesMessage.style.display = 'block';
+      favoritesList.style.display = 'none';
+    } else {
+      noFavoritesMessage.style.display = 'none';
+      favoritesList.style.display = 'block';
+      favoritesList.innerHTML = '';
+
+      favoriteParks.forEach((park) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <a href="/parks/${park._id}">
+            ${park.park_name}
+          </a>
+          <span class="favorite-rating">
+            ⭐ ${park.rating ?? 'N/A'}
+          </span>
+        `;
+        favoritesList.appendChild(li);
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load favorites:', err);
+    noFavoritesMessage.textContent = 'Failed to load favorite parks.';
+    noFavoritesMessage.style.display = 'block';
+  }
+}
+
+    
   } catch (error) {
     console.error('Error fetching user profile:', error);
 

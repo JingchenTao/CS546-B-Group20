@@ -3,11 +3,14 @@ import { ObjectId } from 'mongodb';
 
 export const getAllParks = async (req, res) => {
   try {
-    const { search, location, type, zipcode, minRating, sort } = req.query;
+    const { search, location, type, zipcode, minRating, sort, limit} = req.query;
     
     const parksList = await parksData.getAllParks(search, location, type, zipcode, minRating, sort);
     
-    res.status(200).json(parksList);
+    const max = Number(limit) && Number(limit) > 0 ? Number(limit) : 20;
+    res.status(200).json(parksList.slice(0, max));
+
+    
   } catch (error) {
     if (error.message && error.message.includes('validation failed')) {
       return res.status(400).json({ error: error.message });

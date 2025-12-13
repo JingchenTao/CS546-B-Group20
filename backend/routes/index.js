@@ -33,20 +33,27 @@ const constructorMethod = (app) => {
 });
 
   app.get('/parks/:id', async (req, res) => {
-    try {
-      const parkId = req.params.id;
+  try {
+    const parkId = req.params.id;
 
-      const park = await parksData.getParkById(parkId);
-      const reviews = await reviewData.getReviewsByParkId(parkId);
+    const park = await parksData.getParkById(parkId);
+    const reviews = await reviewData.getReviewsByParkId(parkId);
 
-      res.render('parks/detail', { park, reviews });
-    } catch (e) {
-      res.status(404).render('error', { error: e });
-    }
-  });
-  //end   
+    res.render('parks/detail', {
+      park,
+      reviews,
+      user: req.session?.user
+    });
+  } catch (e) {
+    res.status(404).render('error', { error: e });
+  }
+});
 
-  app.use('/parks', parksRoutes);
+  //end 1st  //frontend update 2nd
+
+  app.use('/api/parks', parksRoutes);  //frontend update 2nd
+
+
   app.use('/users', usersRoutes);
   app.use('/reviews', reviewsRoutes);
   app.use('/comments', commentsRoutes);
