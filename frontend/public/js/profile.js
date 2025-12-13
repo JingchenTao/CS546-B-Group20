@@ -84,6 +84,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     noFavoritesMessage.style.display = 'block';
   }
 }
+    // Reviewed Parks
+    const reviewedList = document.getElementById('reviewed-parks-list');
+    const noReviewedMessage = document.getElementById('no-reviewed-parks-message');
+
+    if (reviewedList && noReviewedMessage) {
+      try {
+        const reviewedRes = await fetch('/users/me/reviewedParks', {
+          credentials: 'include'
+        });
+
+        if (!reviewedRes.ok) throw new Error();
+
+        const reviewedParks = await reviewedRes.json();
+
+        if (!reviewedParks.length) {
+          noReviewedMessage.style.display = 'block';
+        } else {
+          reviewedList.innerHTML = '';
+          reviewedParks.forEach((park) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <a href="/parks/${park._id}">${park.park_name}</a>
+            `;
+            reviewedList.appendChild(li);
+          });
+        }
+      } catch {
+        noReviewedMessage.textContent = 'Failed to load reviewed parks.';
+        noReviewedMessage.style.display = 'block';
+      }
+    }
 
     
   } catch (error) {

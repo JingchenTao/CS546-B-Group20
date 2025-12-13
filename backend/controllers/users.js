@@ -269,3 +269,36 @@ export const getFavoriteParksForCurrentUser = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
+
+// frontend udpate regarding reviewed parks
+import * as reviewData from '../data/review.js';
+import * as parksData from '../data/parks.js';
+
+export const getReviewedParksForCurrentUser = async (req, res) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const userId = req.session.user._id;
+
+        // browse users reviews
+        const reviews = await reviewData.getReviewsByUserId(userId);
+
+        if (!reviews || reviews.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        // park_id
+        const parkIds = reviews.map(r => r.park_id.toString());
+
+        // parks
+        const parks = await Promise.all(
+            parkIds.map(id => parksData.getParkById(id))
+        );
+
+        return res.status(200).json(parks);
+    } catch (error) {
+        return res.status(500).json({ error: getErrorMessage(error) });
+    }
+};

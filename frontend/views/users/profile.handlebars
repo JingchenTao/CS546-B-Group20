@@ -38,19 +38,11 @@
   <section class="profile-section">
   <h2>My Reviewed Parks</h2>
 
-  {{#if reviewedParks.length}}
-    <ul class="park-list">
-      {{#each reviewedParks}}
-        <li>
-          <a href="/parks/{{this._id}}">
-            {{this.name}}
-          </a>
-        </li>
-      {{/each}}
-    </ul>
-  {{else}}
-    <p>You haven’t reviewed any parks yet.</p>
-  {{/if}}
+  <ul class="park-list" id="reviewed-parks-list"></ul>
+
+  <p id="no-reviewed-parks-message" style="display: none;">
+    You haven’t reviewed any parks yet.
+  </p>
 </section>
 
 <script src="/public/js/profile.js"></script>
