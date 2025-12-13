@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import { users, parks } from '../config/mongoCollections.js';
 import { trimString, validateObjectId } from '../helpers.js';
-
+import { addHistory} from '../data/history.js';
 const normalizeString = (value, fieldName) => {
     if (value === undefined || value === null) {
         throw `${fieldName} is required`;
@@ -204,7 +204,7 @@ export const createUser = async (
         throw new Error('Could not fetch created user');
     }
 
-    return {
+    let createdUser = {
         _id: created._id.toString(),
         first_name: created.first_name,
         last_name: created.last_name,
@@ -217,9 +217,15 @@ export const createUser = async (
         ),
         createdAt: created.createdAt
     };
+
+    let content = `The user (${created._id.toString()}) was created by  ${created._id.toString()}`;
+
+    await addHistory(created._id.toString(), created._id.toString(), 'users', 'create', content, {before: null, after:createdUser})
+
+    return createdUser;
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async (id, viewedById = null) => {
     let validatedId;
     try {
         validatedId = validateObjectId(id);
@@ -231,6 +237,21 @@ export const getUserById = async (id) => {
     const user = await usersCollection.findOne({ _id: new ObjectId(validatedId) });
     if (!user) {
         throw new Error('User not found');
+    }
+    if (viewedById){
+        try {
+            viewedById = validateObjectId(viewedById);
+        } catch (error) {
+            throw new Error(`User ID validation failed: ${error.message || error}`);
+        }
+        if(viewedById.toString() !== validatedId.toString()){
+            const viewedBy = await usersCollection.findOne({ _id: new ObjectId(viewedById) });
+            if (!viewedBy) {
+                throw new Error('User not found');
+            }
+            let content = `The user (${validatedId}) was viewed by ${viewedById}`;
+            await addHistory(viewedById, validatedId, 'users', 'view', content, {before: null, after:null})
+        }
     }
 
     return {
@@ -248,12 +269,18 @@ export const getUserById = async (id) => {
     };
 };
 
-export const promoteUserToAdmin = async (id) => {
+export const promoteUserToAdmin = async (id, promotedbyId) => {
     let validatedId;
     try {
         validatedId = validateObjectId(id);
     } catch (error) {
         throw new Error(`User ID validation failed: ${error.message || error}`);
+    }
+
+    try {
+        promotedbyId = validateObjectId(promotedbyId);
+    } catch (error) {
+        throw new Error(`Admin ID validation failed: ${error.message || error}`);
     }
 
     const usersCollection = await users();
@@ -265,11 +292,24 @@ export const promoteUserToAdmin = async (id) => {
         throw new Error('User is already an admin');
     }
 
+    const existingAdmin = await usersCollection.findOne({ _id: new ObjectId(promotedbyId) });
+    if (!existingAdmin) {
+        throw new Error('Admin not found');
+    }
+    if (existingAdmin.role !== 'admin') {
+        throw new Error('User should be promoted by an admin');
+    }
+
     const updateResult = await usersCollection.findOneAndUpdate(
         { _id: new ObjectId(validatedId) },
         { $set: { role: 'admin' } },
         { returnDocument: 'after' }
     );
+
+    if(!updateResult || !updateResult.value) throw new Error('Could not promote user');
+    let content = `The user (${validatedId}) was promoted by ${promotedbyId}`;
+    await addHistory(promotedbyId, validatedId, 'users', 'promote', content, {before: { role: 'user' }, after: { role: 'admin' }})
+
 
     const updatedUser = updateResult.value;
     return {
@@ -383,11 +423,14 @@ export const addFavoritePark = async (userId, parkId) => {
         throw new Error('User not found');
     }
 
-    return {
-        _id: updatedUser._id.toString(),
-        favorite_Parks: (updatedUser.favorite_Parks || []).map((id) =>
+    updatedUser.favorite_Parks = (updatedUser.favorite_Parks || []).map((id) =>
             typeof id === 'string' ? id : id.toString()
         )
+    let content = `The user (${validatedUserId}) added the park ${validatedParkId} into his favourite park list.`;
+    await addHistory(validatedUserId, validatedParkId, 'users', 'favorite_add', content, {before: { favorite_Parks: currentFavorite }, after: { favorite_Parks: updatedUser.favorite_Parks }})
+    return {
+        _id: updatedUser._id.toString(),
+        favorite_Parks: updatedUser.favorite_Parks
     };
 };
 
@@ -408,7 +451,14 @@ export const removeFavoritePark = async (userId, parkId) => {
     }
 
     const usersCollection = await users();
+    const parksCollection = await parks();
+    const parkObjectId = new ObjectId(validatedParkId);
+    const park = await parksCollection.findOne({ _id: parkObjectId });
+    if (!park) {
+        throw new Error('Park not found');
+    }
 
+    let currentFavorite = (await getUserById(validatedUserId)).favorite_Parks
 
     const updateResult = await usersCollection.findOneAndUpdate(
         { _id: new ObjectId(validatedUserId) },
@@ -416,16 +466,22 @@ export const removeFavoritePark = async (userId, parkId) => {
         { returnDocument: 'after' }
     );
 
-    const updatedUser = updateResult.value;
+    let updatedUser = updateResult.value;
     if (!updatedUser) {
         throw new Error('User not found');
     }
 
-    return {
-        _id: updatedUser._id.toString(),
-        favorite_Parks: (updatedUser.favorite_Parks || []).map((id) =>
+    updatedUser.favorite_Parks = (updatedUser.favorite_Parks || []).map((id) =>
             typeof id === 'string' ? id : id.toString()
         )
+
+
+    let content = `The user (${validatedUserId}) removed the park ${validatedParkId} from his favourite park list.`;
+    await addHistory(validatedUserId, validatedParkId, 'users', 'favorite_remove', content, {before: { favorite_Parks: currentFavorite }, after: { favorite_Parks: updatedUser.favorite_Parks }})
+    
+    return {
+        _id: updatedUser._id.toString(),
+        favorite_Parks: updatedUser.favorite_Parks
     };
 };
 

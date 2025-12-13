@@ -25,4 +25,4 @@ export const reviews = reviewCol;
 
 export const comment = commentCol;
 export const comments = commentCol
-export const histories = historyCol;
+export const history = historyCol;

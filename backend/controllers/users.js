@@ -70,7 +70,23 @@ export const promoteUser = async (req, res) => {
             return res.status(400).json({ error: 'userId is required' });
         }
 
-        const updated = await usersData.promoteUserToAdmin(userId);
+        if (typeof userId !== 'string' || userId.trim() === '') {
+            return res.status(400).json({ error: 'User id must be a non-empty string' });
+        }
+        
+        if (!ObjectId.isValid(userId.trim())) {
+            return res.status(400).json({ error: 'User id must be a valid ObjectId' });
+        }
+        
+        let promotedById;
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ error: 'The admin should login!' });
+        } 
+        if (req.session.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Admin only' });
+        }
+        promotedById = req.session.user._id.toString();
+        const updated = await usersData.promoteUserToAdmin(userId, promotedById);
         return res.status(200).json(updated);
     } catch (error) {
         const message = getErrorMessage(error);
@@ -78,7 +94,7 @@ export const promoteUser = async (req, res) => {
         if (lower.includes('validation failed') || lower.includes('must')) {
             return res.status(400).json({ error: message });
         }
-        if (lower.includes('user not found')) {
+        if (lower.includes('not found')) {
             return res.status(404).json({ error: message });
         }
         if (lower.includes('already an admin')) {
@@ -87,6 +103,7 @@ export const promoteUser = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
+
 
 
 
@@ -159,7 +176,21 @@ export const getUserById = async (req, res) => {
             return res.status(400).json({ error: 'User id is required' });
         }
 
-        const user = await usersData.getUserById(id);
+        if (typeof id !== 'string' || id.trim() === '') {
+            return res.status(400).json({ error: 'User id must be a non-empty string' });
+        }
+        
+        if (!ObjectId.isValid(id.trim())) {
+            return res.status(400).json({ error: 'User id must be a valid ObjectId' });
+        }
+
+        let viewedbyId;
+        if (!req.session || !req.session.user) {
+            viewedbyId = null;
+        } else {
+            viewedbyId = req.session.user._id;
+        }
+        let user = await usersData.getUserById(id, viewedbyId);
         return res.status(200).json(user);
     } catch (error) {
         const message = getErrorMessage(error);
@@ -173,6 +204,8 @@ export const getUserById = async (req, res) => {
         return res.status(500).json({ error: message });
     }
 };
+
+
 
 export const logoutUser = async (req, res) => {
     if (!req.session) {

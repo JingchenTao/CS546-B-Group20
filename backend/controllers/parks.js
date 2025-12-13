@@ -28,11 +28,21 @@ export const getParkById = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    const park = await parksData.getParkById(id);
+    let viewedbyId;
+    if (!req.session || !req.session.user) {
+        viewedbyId = null;
+    } else {
+        viewedbyId = req.session.user._id.toString();
+    }
+    
+    const park = await parksData.getParkById(id, viewedbyId);
     
     res.status(200).json(park);
   } catch (error) {
     if (error.message && error.message.includes('No park found')) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message && error.message.includes('User not found')) {
       return res.status(404).json({ error: error.message });
     }
     if (error.message && error.message.includes('validation failed')) {
