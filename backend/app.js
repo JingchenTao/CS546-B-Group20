@@ -9,16 +9,34 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const rewriteUnsupportedBrowserMethods = (req, res, next) => {
+  let methodRewrite = null;
+  if (req.body && req.body._method) {
+    methodRewrite = req.body._method;
+    delete req.body._method; 
+  }
+  if (!methodRewrite && req.query && req.query._method) {
+    methodRewrite = req.query._method;
+  }
+  if (methodRewrite) {
+    req.method = methodRewrite.toUpperCase();
+  }
+  next();
+};
+
 const app = express();
+
 app.use(express.urlencoded({ extended: true }));
+
 const port = 3000;
+
 
 // JSON body parsing
 app.use(express.json({ limit: '10mb' }));
 
 // Cookie parser (required for session)
 app.use(cookieParser());
-
+app.use(rewriteUnsupportedBrowserMethods);
 // Session configuration
 app.use(session({
   name: 'AuthCookie',
@@ -100,7 +118,7 @@ app.set('views', path.resolve(__dirname, '../frontend/views'));
 // Configure routes
 configRoutes(app);
 
-app.listen(3000, () => {
+app.listen(port, () => {
   console.log("We've now got a server!");
   console.log('Your routes will be running on http://localhost:3000');
 });

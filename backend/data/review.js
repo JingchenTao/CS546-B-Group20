@@ -145,15 +145,27 @@ const deleteReviewByReviewId = async (
     reviewId
 ) =>   {
     reviewId = checkId(reviewId, 'review ID');
-    let currentReview =  await getReviewByReviewId(reviewId);
+    const currentReview =  await getReviewByReviewId(reviewId);
     const reviewsCollection = await reviews();
-    const deletionInfo = await reviewsCollection.findOneAndDelete({_id: new ObjectId(reviewId)});
-    if (!deletionInfo) {
+    const deletionResult = await reviewsCollection.deleteOne({_id: new ObjectId(reviewId)});
+    if (deletionResult.deletedCount === 0) {
         throw `Could not delete the review with id (${reviewId})`;
     }
-    await recalculateParkRating(currentReview.park_id.toString());
-    let deletedComment = await deleteCommentByReviewID(reviewId);
-    return {review_id: deletionInfo._id.toString(), deleted_comments_count: deletedComment.deleted_number, deleted: true};
+
+    Promise.resolve().then(async () => {
+    try {
+        await recalculateParkRating(currentReview.park_id.toString());
+    } catch (e) {
+        console.error('[WARN] recalc rating failed', e);
+    }
+
+    try {
+        await deleteCommentByReviewID(reviewId);
+    } catch (e) {
+        console.error('[WARN] delete comments failed', e);
+    }
+});
+    return {review_id: reviewId, deleted: true};
 }
 
 
