@@ -65,6 +65,9 @@ router
       return res.status(200).json(reviewInfo);
 
     } catch (e) {
+      if (typeof e === 'string' && e.includes('Could not delete the review with id')) {
+        return res.status(404).json({ error: e });
+      }
       return res.status(500).json({error: 'Internal server error!'});
     }
   })
