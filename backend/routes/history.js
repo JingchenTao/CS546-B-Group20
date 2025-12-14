@@ -11,7 +11,7 @@ router
     }
 
     try {
-        let historyInfo = await historyMethod.getHistory(req.session.user._id.toString());
+        let historyInfo = await historyMethod.getHistoryByHistoryId(req.session.user._id.toString());
         return res.status(200).json(historyInfo);
     } catch (e) {
         if (typeof e === 'string' && e.includes('No user with this user ID')) {

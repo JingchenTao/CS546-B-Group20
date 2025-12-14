@@ -3,6 +3,7 @@ import {ObjectId} from 'mongodb';
 import { checkId, checkIsProperRate, checkIsProperReview } from '../controllers/review.js';
 import { deleteCommentByReviewID } from './comment.js';
 import { getParkById } from './parks.js';
+import { addHistory } from './history.js';
 
 
 async function recalculateParkRating(parkId) {
@@ -167,6 +168,7 @@ const deleteReviewByReviewId = async (
     if( userId !== currentReview.user_id.toString() && user.role !== 'admin'){
         throw 'Only current user or admin can delete the review.'
     }
+
 
     const reviewsCollection = await reviews();
     const deletionResult = await reviewsCollection.deleteOne({_id: new ObjectId(reviewId)});

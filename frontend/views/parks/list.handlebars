@@ -1,31 +1,60 @@
 <div class="parks-list-wrapper">
 
   <div class="parks-hero">
-  <h1>Parks List</h1>
-  <p class="subtitle">Browse parks and discover outdoor spaces to explore.</p>
-  <p class="subtitle small">Showing top 20 highest rated parks.</p>
-</div>
-
-  <div class="parks-grid">
-    {{#each parks}}
-      <div class="park-card cute">
-        <h2 class="park-name">{{park_name}}</h2>
-
-        <p class="location">
-          <strong>Location:</strong> {{park_location}}
-        </p>
-
-        <p class="rating">
-          <strong>Rating:</strong> {{rating}}/5.0
-        </p>
-
-        <a href="/parks/{{_id}}" class="details-btn cute-btn">
-          View Details
-        </a>
-      </div>
-    {{/each}}
+    <h1>Parks List</h1>
+    <p class="subtitle">Browse parks and discover outdoor spaces to explore.</p>
   </div>
 
+  <!-- search and filter-->
+  <form id="park-search-form" class="parks-search-bar">
+  <input
+    type="text"
+    name="search"
+    placeholder="Search park name..."
+  />
+
+  <select name="location">
+    <option value="">All Locations</option>
+    <option value="M">Manhattan</option>
+    <option value="B">Brooklyn</option>
+    <option value="Q">Queens</option>
+    <option value="X">Bronx</option>
+    <option value="R">Staten Island</option>
+  </select>
+
+  <select name="type">
+    <option value="">All Types</option>
+    <option value="Playground">Playground</option>
+    <option value="Garden">Garden</option>
+    <option value="Neighborhood Park">Neighborhood Park</option>
+    <option value="Nature Area">Nature Area</option>
+  </select>
+
+  <select name="sort">
+    <option value="rating_desc">Rating ↓</option>
+    <option value="rating_asc">Rating ↑</option>
+    <option value="name_asc">Name A–Z</option>
+    <option value="name_desc">Name Z–A</option>
+    <option value="reviews_desc">Most Reviews</option>
+  </select>
+
+  <button type="submit">Search</button>
+</form>
+
+
+  <div class="parks-grid"></div>
+
+
 </div>
+
+<!-- pagination -->
+<div class="pagination">
+  <button id="prev-btn" disabled>Prev</button>
+  <span id="page-info"></span>
+  <button id="next-btn">Next</button>
+</div>
+
+<script src="/public/js/parkList.js"></script>
+
 
 

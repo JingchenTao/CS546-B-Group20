@@ -52,16 +52,7 @@ const addHistory = async (
         }
         const historyCollection = await history();
 
-        if (['view','favorite_add','favorite_remove'].includes(operation)){
-            const recentHistory = await historyCollection.findOne({
-                user_id: new ObjectId(userId),
-                target_type: target_type,
-                target_id: new ObjectId(target_id),
-                operation:operation,
-                createdAt: { $gte: new Date(Date.now() - 30 * 1000) }
-            });
-            if(recentHistory) return;
-        }
+
         let newHistory = {
             user_id: new ObjectId(userId),
             target_id: new ObjectId(target_id),
@@ -74,7 +65,7 @@ const addHistory = async (
         
         await historyCollection.insertOne(newHistory);     
     } catch (e) {
-        console.error('Failed to add history:', e);   
+        throw e;   
     }
 };
 

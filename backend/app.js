@@ -25,16 +25,19 @@ const rewriteUnsupportedBrowserMethods = (req, res, next) => {
 };
 
 const app = express();
+
 app.use(express.urlencoded({ extended: true }));
+
 const port = 3000;
+
 
 // JSON body parsing
 app.use(express.json({ limit: '10mb' }));
 
 // Cookie parser (required for session)
 app.use(cookieParser());
-
 app.use(rewriteUnsupportedBrowserMethods);
+
 // Session configuration
 app.use(session({
   name: 'AuthCookie',
@@ -76,7 +79,7 @@ app.use('/users/register', async (req, res, next) => {
 
 
 app.use('/users/userProfile', async (req, res, next) => {
-     if(req.method === 'GET' && !req.session.user){
+     if(!req.session.user){
           return res.redirect('/users/login');
      } 
      next();
@@ -84,12 +87,14 @@ app.use('/users/userProfile', async (req, res, next) => {
 
 
 app.use('/users/adminProfile', async (req, res, next) => {
+     if (!req.session.user) {
+          return res.redirect('/users/login');
+     }
      if(req.method === 'GET'){
-          if (!req.session.user) {
-               return res.redirect('/users/login');
-          } else if( req.session.user.role !== 'admin'){
-               return res.status(403).render('error',{title:'admin',error: '403: the user does not have permission to view the page!',
-                                            redirectLink: '/users/userProfile'});
+          if( req.session.user.role !== 'admin'){
+               return res.status(403).render('error',{title:'admin',
+                                                       error: '403: the user does not have permission to view the page!',
+                                                       redirectLink: '/users/userProfile'});
           } 
           next();
      } else {
@@ -109,12 +114,10 @@ app.use('/users/logout', async (req, res, next) => {
 app.use('/history/', async (req, res, next) => {
      if(req.method === 'GET'){
           if (!req.session.user) {
-               return res.redirect('/users/userProfile');       
-          } else {next();}
-     } else {
-          next();
+               return res.redirect('/users/login');       
+          } 
      }
-     
+     next();
 });
 
 app.use('/public', express.static(path.resolve(__dirname, '../frontend/public')));

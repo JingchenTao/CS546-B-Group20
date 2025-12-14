@@ -306,24 +306,22 @@ export const promoteUserToAdmin = async (id, promotedbyId) => {
         { returnDocument: 'after' }
     );
 
-    if(!updateResult || !updateResult.value) throw new Error('Could not promote user');
+    if(!updateResult) throw new Error('Could not promote user');
     let content = `The user (${validatedId}) was promoted by ${promotedbyId}`;
     await addHistory(promotedbyId, validatedId, 'users', 'promote', content, {before: { role: 'user' }, after: { role: 'admin' }})
 
-
-    const updatedUser = updateResult.value;
     return {
-        _id: updatedUser._id.toString(),
-        first_name: updatedUser.first_name,
-        last_name: updatedUser.last_name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        address_zip: updatedUser.address_zip || null,
-        address_city: updatedUser.address_city || null,
-        favorite_Parks: (updatedUser.favorite_Parks || []).map((id) =>
+        _id: updateResult._id.toString(),
+        first_name: updateResult.first_name,
+        last_name: updateResult.last_name,
+        email: updateResult.email,
+        role: updateResult.role,
+        address_zip: updateResult.address_zip || null,
+        address_city: updateResult.address_city || null,
+        favorite_Parks: (updateResult.favorite_Parks || []).map((id) =>
             typeof id === 'string' ? id : id.toString()
         ),
-        createdAt: updatedUser.createdAt
+        createdAt: updateResult.createdAt
     };
 };
 
@@ -418,19 +416,18 @@ export const addFavoritePark = async (userId, parkId) => {
         { returnDocument: 'after' }
     );
 
-    const updatedUser = updateResult.value;
-    if (!updatedUser) {
+    if (!updateResult) {
         throw new Error('User not found');
     }
 
-    updatedUser.favorite_Parks = (updatedUser.favorite_Parks || []).map((id) =>
+    updateResult.favorite_Parks = (updateResult.favorite_Parks || []).map((id) =>
             typeof id === 'string' ? id : id.toString()
         )
     let content = `The user (${validatedUserId}) added the park ${validatedParkId} into his favourite park list.`;
-    await addHistory(validatedUserId, validatedParkId, 'users', 'favorite_add', content, {before: { favorite_Parks: currentFavorite }, after: { favorite_Parks: updatedUser.favorite_Parks }})
+    await addHistory(validatedUserId, validatedParkId, 'users', 'favorite_add', content, {before: { favorite_Parks: currentFavorite }, after: { favorite_Parks: updateResult.favorite_Parks }})
     return {
-        _id: updatedUser._id.toString(),
-        favorite_Parks: updatedUser.favorite_Parks
+        _id: updateResult._id.toString(),
+        favorite_Parks: updateResult.favorite_Parks
     };
 };
 
@@ -464,13 +461,12 @@ export const removeFavoritePark = async (userId, parkId) => {
        throw new Error(`The park is not current user's favourite park, so it could not be removed.`)
     }
 
-    const updateResult = await usersCollection.findOneAndUpdate(
+    const updatedUser = await usersCollection.findOneAndUpdate(
         { _id: new ObjectId(validatedUserId) },
         { $pull: { favorite_Parks: new ObjectId(validatedParkId) } },
         { returnDocument: 'after' }
     );
 
-    let updatedUser = updateResult.value;
     if (!updatedUser) {
         throw new Error('User not found');
     }

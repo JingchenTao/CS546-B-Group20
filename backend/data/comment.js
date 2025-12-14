@@ -1,6 +1,7 @@
 import {parks, users, reviews, comments } from '../config/mongoCollections.js';
 import {ObjectId} from 'mongodb';
 import { checkId, checkIsProperRate, checkIsProperReview } from '../controllers/review.js';
+import { addHistory } from './history.js';
 
 
 // get comment by comment id

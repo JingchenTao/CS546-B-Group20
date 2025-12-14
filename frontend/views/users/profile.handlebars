@@ -1,22 +1,26 @@
+<div class="page-wrapper user-page">
+<div class="user-page-wrapper">
+  <div class="user-card">
+
 <div class="profile-page">
   <h1>Profile</h1>
 
   <section class="profile-info">
     <div class="profile-field">
-      <label>Name</label>
+      <h3>Name:</h3>
       <div class="profile-value" id="profile-name">
         <!-- Name + Email + Address -->
       </div>
     </div>
 
     <div class="profile-field">
-      <label>Email</label>
+      <h3>Email:</h3>
       <div class="profile-value" id="profile-email">
       </div>
     </div>
 
     <div class="profile-field">
-      <label>Address</label>
+      <h3>Address:</h3>
       <div class="profile-value" id="profile-address">
       </div>
     </div>
@@ -31,4 +35,25 @@
   </section>
 </div>
 
+  <section class="profile-section">
+  <h2>My Reviewed Parks</h2>
+
+  <ul class="park-list" id="reviewed-parks-list"></ul>
+
+  <p id="no-reviewed-parks-message" style="display: none;">
+    You haven’t reviewed any parks yet.
+  </p>
+</section>
+
+<section class="action-buttons" style="margin-top: 25px; text-align: center;">
+      <a href="/users/logout" class="btn logout-btn" 
+        style="padding: 10px 20px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px;">
+          Log Out
+      </a>
+</section>
+
 <script src="/public/js/profile.js"></script>
+
+  </div>
+</div>
+</div>

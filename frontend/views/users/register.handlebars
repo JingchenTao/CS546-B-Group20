@@ -1,4 +1,14 @@
+<div class="page-wrapper user-page">
+<div class="user-page-wrapper">
+  <div class="user-card">
+
 <h1>Register</h1>
+
+{{#if error}}
+  <div class="error-message" role="alert" style="color: red; margin-top: 10px;">
+    {{error}}
+  </div>
+{{/if}}
 
 <form class="register-form" method="POST" action="/users/register">
   <div class="form-group">
@@ -41,3 +51,6 @@
 
 <script src="/public/js/register.js"></script>
 
+  </div>
+</div>
+</div>

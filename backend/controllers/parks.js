@@ -3,11 +3,13 @@ import { ObjectId } from 'mongodb';
 
 export const getAllParks = async (req, res) => {
   try {
-    const { search, location, type, zipcode, minRating, sort } = req.query;
+    const { search, location, type, zipcode, minRating, sort} = req.query;
     
     const parksList = await parksData.getAllParks(search, location, type, zipcode, minRating, sort);
     
     res.status(200).json(parksList);
+
+    
   } catch (error) {
     if (error.message && error.message.includes('validation failed')) {
       return res.status(400).json({ error: error.message });

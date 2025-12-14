@@ -3,6 +3,7 @@ import { parks } from '../config/mongoCollections.js';
 import { review } from '../config/mongoCollections.js';
 import { comment } from '../config/mongoCollections.js';
 import { users } from '../config/mongoCollections.js';
+import { addHistory } from './history.js';
 import {
   validateParkName,
   validateParkLocation,

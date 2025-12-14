@@ -250,7 +250,7 @@ router
         return res.status(200).json(commentInfo);
       } catch (e) {
         if (typeof e === 'string' && e.includes('No user with this user ID')) {
-          return res.status(409).json({ error: e });
+          return res.status(404).json({ error: e });
         }
         return res.status(500).json({error: 'Internal server error!'});
       }

@@ -13,6 +13,7 @@ router.get('/register', (req, res) => {
 router.post('/register', usersController.registerUser);
 
 
+
 // get login
 router.get('/login', (req, res) => {
     res.render('users/login',{title: 'login'});
@@ -35,6 +36,13 @@ router.get('/me', usersController.getCurrentUser);
 
 // Get current user's favorite parks (with park details)
 router.get('/me/favorites', usersController.getFavoriteParksForCurrentUser);
+
+
+
+// Get current user's reviewed parks  (frontend update)
+router.get('/me/reviewedParks', usersController.getReviewedParksForCurrentUser);
+
+
 
 // Add a park to current user's favorites
 router.post('/me/favorites/:parkId', usersController.addFavoriteParkForCurrentUser);

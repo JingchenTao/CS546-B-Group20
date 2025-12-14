@@ -1,11 +1,11 @@
 <div class="page-wrapper">
-
   <div class="park-detail-header">
     <h1 class="park-title">{{park.park_name}}</h1>
     <p class="park-type">{{park.park_type}}</p>
   </div>
 
-  <div class="park-detail-card">
+  <!-- Park Info -->
+  <div class="park-detail-card" data-park-location="{{park.park_location}}">
     <h2>Park Information</h2>
 
     <p>
@@ -24,51 +24,238 @@
     </p>
 
     <p>
-      <strong>Rating:</strong>
+      <strong>Average Rating:</strong>
       {{park.rating}} / 5.0
     </p>
-  </div>
 
-  <div class="reviews-section">
-    <h2 class="reviews-title">Reviews</h2>
-
-    {{#if reviews.length}}
-      {{#each reviews}}
-        <div class="review-card">
-          <h3 class="review-user">{{user_name}}</h3>
-
-          <p class="review-rating">
-            <strong>Rating:</strong> {{rating}} / 5.0
-          </p>
-
-          <p class="review-comment">
-            {{review_content}}
-          </p>
-        </div>
-      {{/each}}
-    {{else}}
-      <p>No reviews yet.</p>
+    {{#if user}}
+      <button
+        type="button"
+        class="favorite-btn"
+        id="favorite-btn"
+        data-park-id="{{park._id}}">
+        ❤️ Add / Remove Favorite
+      </button>
     {{/if}}
-
+    
+    {{#if user}}
+      {{#if user.isAdmin}}
+        <button type="button" class="edit-btn" id="admin-edit-park" data-park-id="{{park._id}}" style="margin-left: 10px;">
+          Edit Park (Admin)
+        </button>
+        <button type="button" class="delete-btn" id="admin-delete-park" data-park-id="{{park._id}}" style="margin-left: 10px;">
+          Delete Park (Admin)
+        </button>
+      {{/if}}
+    {{/if}}
+    
+    {{#if user}}
+      {{#if user.isAdmin}}
+        <div id="admin-edit-form" style="display: none; margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+          <h3>Edit Park Information</h3>
+          <form id="edit-park-form">
+            <div style="margin-bottom: 15px;">
+              <label for="edit-park-name">Park Name:</label>
+              <input type="text" id="edit-park-name" name="park_name" value="{{park.park_name}}" required style="width: 100%; padding: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <label for="edit-park-description">Description:</label>
+              <textarea id="edit-park-description" name="description" rows="4" required style="width: 100%; padding: 8px;">{{park.description}}</textarea>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <label for="edit-park-type">Park Type:</label>
+              <input type="text" id="edit-park-type" name="park_type" value="{{park.park_type}}" required style="width: 100%; padding: 8px;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <label for="edit-park-zip">Zip Code(s) (comma-separated):</label>
+              <input type="text" id="edit-park-zip" name="park_zip" value="{{park.park_zip_display}}" required style="width: 100%; padding: 8px;" placeholder="10024,10025">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <label for="edit-park-location">Location:</label>
+              <select id="edit-park-location" name="park_location" required style="width: 100%; padding: 8px;">
+                <option value="M">Manhattan</option>
+                <option value="B">Brooklyn</option>
+                <option value="Q">Queens</option>
+                <option value="X">Bronx</option>
+                <option value="R">Staten Island</option>
+              </select>
+            </div>
+            
+            <div>
+              <button type="submit" style="padding: 10px 20px; background: #2c593a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Save Changes
+              </button>
+              <button type="button" id="cancel-edit-park" style="padding: 10px 20px; margin-left: 10px; background: #ccc; color: black; border: none; border-radius: 4px; cursor: pointer;">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      {{/if}}
+    {{/if}}
   </div>
 
-<h3 class="review-form-title">Add a Review</h3>
+  <!-- Facility Info-->
+  <div class="park-detail-card">
+    <h2>Facility Details</h2>
 
-<form class="review-form-card" method="POST" action="/reviews/park/{{park._id}}">
-  <div class="form-group">
-    <label for="rating">Rating</label>
-    <input type="number" name="rating" min="1" max="5" required>
+    <ul class="facility-list">
+      <li>
+        <strong>Park Category:</strong> {{park.park_type}}
+      </li>
+      <li>
+        <strong>Facilities & Usage:</strong>
+        {{#if park.description}}
+          This park offers facilities and features as described above.
+        {{else}}
+          Facility details are not available.
+        {{/if}}
+      </li>
+    </ul>
   </div>
 
-  <div class="form-group">
-    <label for="comment">Comment</label>
-    <textarea name="review_content" rows="3" required></textarea>
-  </div>
+  <div class="park-detail-card">
+  <h2>Explore Similar Parks</h2>
 
-  <button type="submit" class="submit-review-btn">Submit Review</button>
-</form>
+  <div class="explore-buttons">
+    <a
+      class="explore-btn"
+      href="/parks?type={{park.park_type}}"
+    >
+      🌱 Other {{park.park_type}} Parks
+    </a>
+
+    <a
+      class="explore-btn"
+      href="/parks?location={{park.park_location}}"
+    >
+      📍 Parks in the Same Area
+    </a>
+  </div>
+</div>
+
+  <!-- Reviews -->
+<div class="reviews-section">
+  <h2 class="reviews-title">Reviews</h2>
+
+  {{#if reviews.length}}
+    {{#each reviews}}
+      <div class="review-card">
+
+        <!-- Review -->
+        <h3 class="review-user">{{user_name}}</h3>
+
+        <div class="star-rating" style="--rating: {{rating}};"></div>
+
+        <p class="review-comment">
+          {{review_content}}
+        </p>
+
+        <!-- delete review -->
+        {{#if isOwner}}
+          <form
+            method="POST"
+            action="/reviews/{{_id}}?_method=DELETE"
+            class="delete-review-form"
+          >
+            <button type="submit" class="delete-btn">
+              Delete Review
+            </button>
+          </form>
+        {{/if}}
+
+        <!-- comment -->
+        {{#if comments.length}}
+          <div class="comments-section">
+            <h4>Comments</h4>
+            <ul class="comment-list">
+              {{#each comments}}
+                <li class="comment-item">
+                  <p class="comment-user">{{user_name}}</p>
+                  <p class="comment-text">{{comment_content}}</p>
+
+                  {{#if isOwner}}
+                    <form
+                      method="POST"
+                      action="/comments/{{_id}}?_method=DELETE"
+                      class="delete-comment-form"
+                    >
+                      <button type="submit" class="delete-btn">
+                        Delete
+                      </button>
+                    </form>
+                  {{/if}}
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+        {{/if}}
+
+        <!-- add comment -->
+        {{#if ../user}}
+          <form
+            method="POST"
+            action="/comments/review/{{_id}}"
+            class="comment-form"
+          >
+            <div class="form-group">
+              <label for="comment-{{_id}}">Add a comment</label>
+              <textarea
+                id="comment-{{_id}}"
+                name="comment_content"
+                rows="2"
+                required
+              ></textarea>
+            </div>
+
+            <button type="submit">
+              Post Comment
+            </button>
+          </form>
+        {{/if}}
+
+      </div>
+    {{/each}}
+  {{else}}
+    <div class="empty-reviews">
+       <p>No reviews yet.</p>
+       <span>Be the first to share your experience 🌱</span>
+   </div>
+  {{/if}}
+</div>
+
+{{#if user}}
+    <h3 class="review-form-title">Add a Review</h3>
+
+    <form class="review-form-card" method="POST" action="/reviews/park/{{park._id}}">
+      <div class="form-group">
+        <label for="rating">Rating</label>
+        <input id="rating" type="number" name="rating" min="1" max="5" required>
+      </div>
+
+      <div class="form-group">
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="review_content" rows="3" required></textarea>
+      </div>
+
+      <button type="submit" class="submit-review-btn">
+        Submit Review
+      </button>
+    </form>
+  {{else}}
+    <p>Please <a href="/users/login">Log in first</a> to leave a review.</p>
+  {{/if}}
+
 
 </div>
 
+<!-- Scripts -->
 <script src="/public/js/parkDetail.js"></script>
+<script src="/public/js/review.js"></script>
+<script src="/public/js/comment.js"></script>
+<script src="/public/js/favorite.js"></script>
 

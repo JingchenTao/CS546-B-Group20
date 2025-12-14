@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('profile.js loaded');
+
 
   try {
     const response = await fetch('/users/me', {
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const user = await response.json();
-    console.log('user from /users/me:', user);
 
     // Name
     const nameElement = document.getElementById('profile-name');
@@ -45,21 +44,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     const noFavoritesMessage = document.getElementById('no-favorites-message');
 
     if (favoritesList && noFavoritesMessage) {
-      if (!user.favorite_Parks || user.favorite_Parks.length === 0) {
-        noFavoritesMessage.style.display = 'block';
-        favoritesList.style.display = 'none';
-      } else {
-        noFavoritesMessage.style.display = 'none';
-        favoritesList.style.display = 'block';
-        favoritesList.innerHTML = '';
+      try {
+      const favRes = await fetch('/users/me/favorites', {
+      method: 'GET',
+      credentials: 'include'
+    });
 
-        user.favorite_Parks.forEach((parkId) => {
-          const li = document.createElement('li');
-          li.textContent = parkId || 'Park ID not available';
-          favoritesList.appendChild(li);
+    if (!favRes.ok) {
+      throw new Error('Failed to fetch favorite parks');
+    }
+
+    const favoriteParks = await favRes.json();
+
+    if (!favoriteParks || favoriteParks.length === 0) {
+      noFavoritesMessage.style.display = 'block';
+      favoritesList.style.display = 'none';
+    } else {
+      noFavoritesMessage.style.display = 'none';
+      favoritesList.style.display = 'block';
+      favoritesList.innerHTML = '';
+
+      favoriteParks.forEach((park) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `/parks/${park._id}`;
+        a.textContent = park.park_name;
+        const ratingField = document.createElement('span');
+        ratingField.className = 'favorite-rating';
+        ratingField.textContent = ` ⭐ ${park.rating ?? 'N/A'}`; 
+        li.appendChild(a);
+        li.appendChild(ratingField);
+        favoritesList.appendChild(li);
+      });
+    }
+  } catch (err) {
+    console.error('Failed to load favorites:', err);
+    noFavoritesMessage.textContent = 'Failed to load favorite parks.';
+    noFavoritesMessage.style.display = 'block';
+  }
+}
+    // Reviewed Parks
+    const reviewedList = document.getElementById('reviewed-parks-list');
+    const noReviewedMessage = document.getElementById('no-reviewed-parks-message');
+
+    if (reviewedList && noReviewedMessage) {
+      try {
+        const reviewedRes = await fetch('/users/me/reviewedParks', {
+          credentials: 'include'
         });
+
+        if (!reviewedRes.ok) throw new Error();
+
+        const reviewedParks = await reviewedRes.json();
+
+        if (!reviewedParks.length) {
+          noReviewedMessage.style.display = 'block';
+        } else {
+          reviewedList.innerHTML = '';
+          reviewedParks.forEach((park) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `/parks/${park._id}`;
+            a.textContent = park.park_name; 
+            li.appendChild(a);
+            reviewedList.appendChild(li);
+          });
+        }
+      } catch {
+        noReviewedMessage.textContent = 'Failed to load reviewed parks.';
+        noReviewedMessage.style.display = 'block';
       }
     }
+
+    
   } catch (error) {
     console.error('Error fetching user profile:', error);
 
@@ -71,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (emailElement) emailElement.textContent = 'Error loading data';
     if (addressElement) addressElement.textContent = 'Error loading data';
 
-    alert(`Error: ${error.message || 'Failed to load profile information'}`);
   }
 });
 

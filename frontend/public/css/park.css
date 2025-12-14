@@ -1,7 +1,7 @@
 /* Layout */
 .parks-list-wrapper,
 .page-wrapper {
-  padding: 50px 20px;
+  padding: 30px 20px 50px;
   position: relative;
   overflow: hidden;
   background: linear-gradient(#e9f9ef, #eefcf8);
@@ -28,7 +28,7 @@
 .page-wrapper::before {
   width: 320px;
   height: 320px;
-  top: 80px;
+  top: 60px;
   left: -140px;
 }
 
@@ -50,10 +50,17 @@
   z-index: 2;
 }
 
+.parks-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+
 /* Hero Section */
 .parks-hero {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .parks-hero h1 {
@@ -64,51 +71,108 @@
 }
 
 .parks-hero .subtitle {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #666;
-  margin-bottom: 25px;
+  margin-bottom: 18px;
 }
 
 /* Search */
+.parks-search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin: 10px auto 34px;
+  max-width: 1100px;
+}
 
-.parks-search input {
-  width: 100%;
-  max-width: 420px;
+.parks-search-bar input {
+  min-width: 240px;
   padding: 12px 16px;
   border-radius: 14px;
   border: 1px solid #cde9d6;
-  font-size: 1rem;
+  background: #ffffffee;
+  font-size: 0.95rem;
   outline: none;
-  transition: 0.15s ease;
+  transition: all 0.18s ease;
 }
 
-.parks-search input:focus {
+.parks-search-bar select {
+  min-width: 160px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #cde9d6;
+  background: #ffffffee;
+  font-size: 0.95rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.18s ease;
+}
+
+.parks-search-bar input:focus,
+.parks-search-bar select:focus {
   border-color: #79c895;
-  box-shadow: 0 0 0 3px rgba(90, 150, 255, 0.18);
+  box-shadow: 0 0 0 3px rgba(121, 200, 149, 0.25);
 }
 
+.parks-search-bar button {
+  padding: 12px 22px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #7fd4a2, #6bb687);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
-.parks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 26px;
+.parks-search-bar button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 700px) {
+  .parks-search-bar {
+    gap: 10px;
+  }
+
+  .parks-search-bar input,
+  .parks-search-bar select {
+    min-width: 100%;
+  }
+
+  .parks-search-bar button {
+    width: 100%;
+  }
 }
 
 /* Card Styling */
 .park-card {
-  background: #ffffffcc; /* slight transparency */
-  backdrop-filter: blur(8px);
-  border-radius: 22px;
-  padding: 26px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.09);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-  text-decoration: none;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px 20px 20px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .park-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
 }
+
+.park-card h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f4f36;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
 
 .park-name {
   font-size: 1.4rem;
@@ -117,17 +181,31 @@
   margin-bottom: 6px;
 }
 
-.location,
-.rating {
-  margin: 6px 0;
-  color: #444;
+.park-card p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #555;
 }
+
+.park-card p strong {
+  color: #2f6b4c;
+  font-weight: 600;
+}
+
+.park-card .park-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
 
 /* Buttons */
 .details-btn,
 .cute-btn {
   display: inline-block;
-  margin-top: 14px;
+  margin-top: 16px;
   padding: 10px 16px;
   background: #7fd4a2;
   color: #fff;
@@ -135,11 +213,31 @@
   border-radius: 12px;
   text-decoration: none;
   transition: background 0.18s ease;
+  font-size: 0.9rem;
 }
 
 .details-btn:hover,
 .cute-btn:hover {
   background: #6bb687;
+}
+
+.park-card a {
+  margin-top: 14px;
+  display: inline-block;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #7cc7a4;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.park-card a:hover {
+  background: #5fb18c;
+  transform: scale(1.04);
 }
 
 /* Detail */
@@ -216,7 +314,6 @@
   color: #888;
 }
 
-
 @media (max-width: 550px) {
   .park-card {
     padding: 20px;
@@ -225,4 +322,26 @@
   .parks-hero h1 {
     font-size: 2rem;
   }
+
+  .parks-search-bar {
+    gap: 10px;
+  }
+}
+
+/* Facility Details */
+.facility-list {
+  margin-top: 16px;
+  padding-left: 20px;
+}
+
+.facility-list li {
+  margin-bottom: 14px;        
+  line-height: 1.6;             
+  font-size: 15px;
+  color: #2f4f3c;
+}
+ 
+.facility-list strong {
+  font-weight: 600;
+  color: #245c3a;
 }
