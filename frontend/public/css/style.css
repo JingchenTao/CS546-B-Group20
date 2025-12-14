@@ -1,0 +1,262 @@
+/* === Explore === */
+.explore-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.explore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 18px;
+  border-radius: 999px;
+
+  background: #e8f5ec;
+  color: #2c593a;
+
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.explore-btn:hover {
+  background: #2c593a;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.park-detail-card .explore-btn {
+  text-decoration: none;
+}
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 40px 0 24px;
+}
+
+.pagination button {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #7cc7a4;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #5fb18c;
+  transform: translateY(-2px);
+}
+
+.pagination button:disabled {
+  background: #cfeede;
+  color: #7fae96;
+  cursor: not-allowed;
+}
+
+#page-info {
+  font-weight: 600;
+  color: #2f6b4c;
+}
+
+.review-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+.review-user {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c593a;
+  margin-bottom: 6px;
+}
+
+.review-rating {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+.review-comment {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #333;
+  background: #f7fbf9;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.delete-btn {
+  background: #cbddb7;
+  color: #046630;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #b8cfa1;
+}
+
+
+.favorite-btn {
+  background: #cbddb7;
+  color: #046630;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.favorite-btn:hover {
+  background: #b8cfa1;
+}
+
+.edit-btn {
+  background: #cbddb7;
+  color: #046630;
+  border: 1px solid #cbddb7;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #b8cfa1;
+}
+
+
+.comments-section {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+.comment-item {
+  list-style: none;
+  background: #f9f9f9;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.comment-user {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+
+.comment-form button {
+  background: #7ccba2;
+  border: none;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.comment-form button:hover {
+  background: #66b18f;
+}
+
+.review-form-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+  margin-top: 20px;
+}
+
+.submit-review-btn {
+  background: #2c593a;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.submit-review-btn:hover {
+  background: #244a30;
+}
+
+.star-rating {
+  --star-size: 18px;
+  --star-color: #d6e4c9;   
+  --star-fill: #5a8f3d;     
+  position: relative;
+  display: inline-block;
+  font-size: var(--star-size);
+  line-height: 1;
+}
+
+.star-rating::before {
+  content: "★★★★★";
+  color: var(--star-color);
+}
+
+.star-rating::after {
+  content: "★★★★★";
+  color: var(--star-fill);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc((var(--rating) / 5) * 100%);
+  overflow: hidden;
+}
+
+
+.comment-form,
+.review-form-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 30px;
+  max-width: 680px;
+  margin: 32px auto;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.comment-form textarea,
+.review-form-card textarea,
+.review-form-card input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #cfe0d3;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.comment-form label,
+.review-form-card label {
+  font-weight: 500;
+  color: #2c593a;
+}
+

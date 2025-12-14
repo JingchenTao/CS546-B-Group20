@@ -50,6 +50,13 @@
   z-index: 2;
 }
 
+.parks-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  margin-top: 32px;
+}
+
 /* Hero Section */
 .parks-hero {
   text-align: center;
@@ -143,19 +150,29 @@
 
 /* Card Styling */
 .park-card {
-  background: #ffffffcc;
-  backdrop-filter: blur(8px);
-  border-radius: 22px;
-  padding: 26px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.09);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
-  text-decoration: none;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px 20px 20px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .park-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 26px rgba(0,0,0,0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
 }
+
+.park-card h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f4f36;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
 
 .park-name {
   font-size: 1.4rem;
@@ -165,10 +182,24 @@
 }
 
 .park-card p {
-  margin: 6px 0;
-  font-size: 0.95rem;
-  color: #444;
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #555;
 }
+
+.park-card p strong {
+  color: #2f6b4c;
+  font-weight: 600;
+}
+
+.park-card .park-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
 
 /* Buttons */
 .details-btn,
@@ -188,6 +219,25 @@
 .details-btn:hover,
 .cute-btn:hover {
   background: #6bb687;
+}
+
+.park-card a {
+  margin-top: 14px;
+  display: inline-block;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #7cc7a4;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.park-card a:hover {
+  background: #5fb18c;
+  transform: scale(1.04);
 }
 
 /* Detail */
@@ -278,3 +328,20 @@
   }
 }
 
+/* Facility Details */
+.facility-list {
+  margin-top: 16px;
+  padding-left: 20px;
+}
+
+.facility-list li {
+  margin-bottom: 14px;        
+  line-height: 1.6;             
+  font-size: 15px;
+  color: #2f4f3c;
+}
+ 
+.facility-list strong {
+  font-weight: 600;
+  color: #245c3a;
+}
