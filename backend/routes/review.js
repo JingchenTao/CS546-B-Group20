@@ -60,11 +60,14 @@ router
 
     let reviewInfo;
     try {
-      reviewInfo = await reviewMethod.deleteReviewByReviewId(req.params.reviewId);
+      reviewInfo = await reviewMethod.deleteReviewByReviewId(req.params.reviewId, req.session.user._id.toString());
 
       return res.status(200).json(reviewInfo);
 
     } catch (e) {
+      if (typeof e === 'string' && e.includes('Could not delete the review with id')) {
+        return res.status(404).json({ error: e });
+      }
       return res.status(500).json({error: 'Internal server error!'});
     }
   })
@@ -113,7 +116,7 @@ router
 
     let reviewInfo;
     try {
-      reviewInfo = await reviewMethod.updateReview(req.params.reviewId, reviewData.rating, reviewData.review_content);
+      reviewInfo = await reviewMethod.updateReview(req.params.reviewId, reviewData.rating, reviewData.review_content, req.session.user._id.toString());
 
       return res.status(200).json(reviewInfo);
 

@@ -4,41 +4,21 @@ import { checkId, checkIsProperString} from '../controllers/review.js';
 
 
 
-const getHistory = async (userId, target_type, operation) => {
-    if (!userId && !target_type && !operation){
-        throw  new Error('You should select at least one from user id, target_type and operation to filter the history!');
-    }
-    let search = {};
-    if (userId) {
-        userId = checkId(userId, 'user ID');
-        const usersCollection = await users();
-        const user = await usersCollection.findOne({_id: new ObjectId(userId)});
-        if (!user) {throw `No user with this user ID ( ${userId} )!`;}
-        search.user_id = new ObjectId(userId);
-    }
-    if(target_type){
-        target_type = checkIsProperString(target_type, 'target_type');
-        if(!['reviews', 'comments', 'parks', 'users'].includes(target_type))
-            {throw `Please provide the target_type from reviews, comments, parks and users!`;}
-        search.target_type = target_type;
-    }
-    if(operation){
-        operation = checkIsProperString(operation, 'operation');
-        if(!['view', 'create', 'update', 'delete','promote','favorite_add','favorite_remove' ].includes(operation))
-            {throw `Please provide the operation from view, create, update, promote and delete, favorite_remove, favorite_remove operations!`;}
-        search.operation = operation;
-
-    }
+const getHistoryByUserId = async (userId) => {
+    userId = checkId(userId, 'user ID');
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({_id: new ObjectId(userId)});
+    if (!user) {throw `No user with this user ID ( ${userId} )!`;}
     const historyCollection = await history();
-    const historyList = await historyCollection.find(search) .sort({ createdAt: -1 }).toArray();
+    const historyList = await historyCollection.find({ user_id: new ObjectId(userId) }) .toArray();
     if (historyList.length === 0) { return []; }
     for(let r of historyList){
         r._id = r._id.toString();
         r.user_id = r.user_id.toString();
-        r.target_id = r.target_id.toString();
     }
     return historyList;
 };
+
 
 const getHistoryByHistoryId = async (historyId) => {
     historyId = checkId(historyId, 'history ID');
@@ -98,15 +78,10 @@ const addHistory = async (
     }
 };
 
-const deleteHistory = async (
-    historyId,
-    userId
+const deleteHistoryByHistoryId = async (
+    historyId
 ) => {
     historyId = checkId(historyId, 'history ID');
-    userId = checkId(userId, 'user ID');
-    const usersCollection = await users();
-    const user = await usersCollection.findOne({_id: new ObjectId(userId)});
-    if (!user) {throw `No user with this user ID ( ${userId} )!`;}
     let deletedhistory = await getHistoryByHistoryId(historyId);
     const historyCollection = await history();
     const deletionInfo = await historyCollection.findOneAndDelete({_id: new ObjectId(historyId)});
@@ -117,4 +92,4 @@ const deleteHistory = async (
 };
 
 
-export { getHistory, getHistoryByHistoryId, addHistory, deleteHistory };
+export { getHistoryByUserId, getHistoryByHistoryId, addHistory, deleteHistoryByHistoryId };

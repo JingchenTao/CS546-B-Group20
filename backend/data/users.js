@@ -460,6 +460,10 @@ export const removeFavoritePark = async (userId, parkId) => {
 
     let currentFavorite = (await getUserById(validatedUserId)).favorite_Parks
 
+    if(!currentFavorite.includes(validatedParkId)){
+       throw new Error(`The park is not current user's favourite park, so it could not be removed.`)
+    }
+
     const updateResult = await usersCollection.findOneAndUpdate(
         { _id: new ObjectId(validatedUserId) },
         { $pull: { favorite_Parks: new ObjectId(validatedParkId) } },

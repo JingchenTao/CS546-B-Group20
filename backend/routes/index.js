@@ -2,7 +2,7 @@ import parksRoutes from './parks.js';
 import usersRoutes from './users.js';
 import reviewsRoutes from './review.js';
 import commentsRoutes from './comment.js';
-
+import historytsRoutes from './history.js';
 import * as parksData from '../data/parks.js'; //frontend update
 import * as reviewData from '../data/review.js';
 
@@ -50,6 +50,7 @@ const constructorMethod = (app) => {
   app.use('/users', usersRoutes);
   app.use('/reviews', reviewsRoutes);
   app.use('/comments', commentsRoutes);
+  app.use('/history', historytsRoutes);
   
   app.use(/(.*)/, (req, res) => {
     res.status(404).json({ error: 'Route not found' });

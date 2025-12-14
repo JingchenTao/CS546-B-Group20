@@ -66,18 +66,28 @@ const addComment = async (
         throw `Could not find this review ID ( ${reviewId} ) !`;
     }
     const commentsCollection = await comments();
+  
+    if(!parentCommentId){
+        const existing = await commentsCollection.findOne({ user_id: new ObjectId(userId),
+                                                                    review_id: new ObjectId(reviewId),
+                                                                    comment_id: null });
+        if(existing) throw `User( ${userId} ) has already commented this review ( ${reviewId} ) . Please edit the existing comment!`; 
+
+    }
+   
     if(parentCommentId){
-        parentCommentId = checkId(parentCommentId, 'parent Comment ID');
-        const currentUserCommentList = await commentsCollection.find({ user_id: new ObjectId(userId) }) .toArray();
-        if (currentUserCommentList.length != 0) { 
-            for(let c of currentUserCommentList){
-                if( c.comment_id && c.comment_id.toString() === parentCommentId){
-                    throw `User( ${userId} ) has already commented this comment ( ${parentCommentId} ) under current review( ${reviewId} ). Please edit the existing comment!`; 
-                }
-            }
+        parentCommentId = checkId(parentCommentId, 'comment ID');
+        const existing = await commentsCollection.findOne({ user_id: new ObjectId(userId),
+                                                                    review_id: new ObjectId(reviewId),
+                                                                    comment_id: new ObjectId(parentCommentId) });
+        if(existing) throw `User( ${userId} ) has already commented this comment ( ${parentCommentId} ) under current review( ${reviewId} ). Please edit the existing comment!`;
+        let currentComment = await getCommentByCommentId(parentCommentId);
+        if(currentComment.review_id.toString() !== reviewId){
+            throw `Parent comment (${parentCommentId}) does not belong to review (${reviewId}).`;
         }
-        parentCommentId = new ObjectId(parentCommentId);    
-    } 
+        parentCommentId = new ObjectId(parentCommentId);
+    }
+
     let newComments = {
         user_id: new ObjectId(userId),
         review_id: new ObjectId(reviewId),
@@ -91,6 +101,14 @@ const addComment = async (
         throw 'Could not add this comment to the review';
     }  
     const addedComments = await getCommentByCommentId(insertInfo.insertedId.toString());
+    let content
+    if (!parentCommentId){
+        content = `The user (${userId}) commented the review ${reviewId}.`;
+    } else {
+         content = `The user (${userId}) commented the comment ${parentCommentId.toString()} under the review ${reviewId}.`;
+    }
+    
+    await addHistory(userId, addedComments._id.toString(), 'comments', 'create', content, {before: null, after: addedComments})
     return addedComments;
 };
 
@@ -99,10 +117,16 @@ const addComment = async (
 
 const updateComment = async (
     commentID,
-    upgraded_comment_content
+    upgraded_comment_content,
+    userId
 ) =>   {
     commentID = checkId(commentID, 'comment ID');
-    await getCommentByCommentId(commentID)
+    userId = checkId(userId, 'user ID');
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
+    let currentComment = await getCommentByCommentId(commentID)
+    if(currentComment.user_id.toString() !== userId.toString() && user.role !== 'admin') throw 'Only current user or admin can edit the comment.'
     upgraded_comment_content = checkIsProperReview(upgraded_comment_content, 'new comment content');
     const commentsCollection = await comments();
     const updatedInfo = await commentsCollection.findOneAndUpdate(
@@ -117,29 +141,41 @@ const updateComment = async (
         throw 'Could not upgrade this comment!';
     }  
     updatedInfo._id = updatedInfo._id.toString();
+    let content = `The user (${userId}) updated the comment ${commentID}.`;
+    await addHistory(userId, commentID, 'comments', 'update', content, {before: currentComment, after: updatedInfo})
     return updatedInfo;
 }
 
 
 
 const deleteCommentByCommentId = async (
-    commentID
+    commentID,
+    userId
 ) =>   {
     commentID = checkId(commentID, 'comment ID');
-    await getCommentByCommentId(commentID)
+    userId = checkId(userId, 'user ID');
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
+    let currentComment = await getCommentByCommentId(commentID)
+    if(currentComment.user_id.toString() !== userId.toString() && user.role !== 'admin') throw 'Only current user or admin can delete the comment.'
     const commentsCollection = await comments();
     const deletionInfo = await commentsCollection.findOneAndDelete({_id: new ObjectId(commentID)});
 
     if (!deletionInfo) {
         throw `Could not delete the comment with id (${commentID})`;
     }
+
+    let content = `The user (${userId}) deleted the comment ${commentID}.`;
+    await addHistory(userId, commentID, 'comments', 'delete', content, {before: currentComment, after: null})
     return {comment_id: deletionInfo._id.toString(), deleted: true};
 }
 
 
 
 const deleteCommentByReviewID = async (
-    reviewId
+    reviewId,
+    userID
 ) =>   {
     reviewId = checkId(reviewId, 'review id');
 

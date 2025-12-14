@@ -234,7 +234,7 @@ export const addFavoriteParkForCurrentUser = async (req, res) => {
         if (!parkId) {
             return res.status(400).json({ error: 'parkId parameter is required' });
         }
-        const result = await usersData.addFavoritePark(req.session.user._id, parkId);
+        const result = await usersData.addFavoritePark(req.session.user._id.toString(), parkId);
         if (result && result.favorite_Parks) {
             req.session.user.favorite_Parks = result.favorite_Parks;
         }
@@ -263,7 +263,7 @@ export const removeFavoriteParkForCurrentUser = async (req, res) => {
         if (!parkId) {
             return res.status(400).json({ error: 'parkId parameter is required' });
         }
-        const result = await usersData.removeFavoritePark(req.session.user._id, parkId);
+        const result = await usersData.removeFavoritePark(req.session.user._id.toString(), parkId);
         if (result && result.favorite_Parks) {
             req.session.user.favorite_Parks = result.favorite_Parks;
         }
@@ -271,6 +271,9 @@ export const removeFavoriteParkForCurrentUser = async (req, res) => {
     } catch (error) {
         const message = getErrorMessage(error);
         const lower = message.toLowerCase();
+        if (lower.includes(`not current user's favourite park`)) {
+            return res.status(409).json({ error: message });
+        }
         if (lower.includes('validation failed') || lower.includes('must')) {
             return res.status(400).json({ error: message });
         }

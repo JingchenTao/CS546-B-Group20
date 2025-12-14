@@ -61,12 +61,14 @@ router
 
     let commentInfo;
     try {
-      commentInfo = await commentMethod.deleteCommentByCommentId(req.params.commentId);
+      commentInfo = await commentMethod.deleteCommentByCommentId(req.params.commentId,  req.session.user._id.toString());
       return res.status(200).json(commentInfo);
 
     } catch (e) {
       return res.status(500).json({error: 'Internal server error!'});
     }
+
+    
 
   })
 
@@ -77,7 +79,7 @@ router
     }
 
     try {
-      req.params.commentId = helper.checkId(req.params.commentId, 'comment id URL Param');
+      req.params.commentId = helper.checkId(req.params.commentId.toString(), 'comment id URL Param');
     } catch (e) {
       return res.status(400).json({error: 'invalid comment ID'});
     }
@@ -108,7 +110,7 @@ router
 
     let commentInfo;
     try {
-      commentInfo = await commentMethod.updateComment(req.params.commentId, commentData.comment_content);
+      commentInfo = await commentMethod.updateComment(req.params.commentId, commentData.comment_content,req.session.user._id.toString() );
 
       return res.status(200).json(commentInfo);
 
@@ -176,7 +178,7 @@ router
   
       let userId
       try {
-        userId = helper.checkId(userInfo._id, 'user id');
+        userId = helper.checkId(userInfo._id.toString(), 'user id');
       } catch (e) {
         return res.status(400).json({error: 'invalid user ID'});
       }
@@ -218,9 +220,14 @@ router
         return res.status(200).json(commentInfo);
   
       } catch (e) {
-        if (typeof e === 'string' && e.includes('already commented this comment')) {
+        if (typeof e === 'string' && e.includes('does not belong to review')) {
+          return res.status(400).json({ error: e });
+        }
+        if (typeof e === 'string' && e.includes('has already commented')) {
           return res.status(409).json({ error: e });
         }
+
+
         return res.status(500).json({error: 'Internal server error!'});
       }
   
@@ -232,7 +239,7 @@ router
     .route('/user/:userId')
     .get(async (req, res) => {
       
-        try {
+      try {
         req.params.userId = helper.checkId(req.params.userId, 'user id URL Param');
       } catch (e) {
         return res.status(400).json({error: 'invalid user ID'});
