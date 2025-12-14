@@ -94,10 +94,12 @@ const constructorMethod = (app) => {
   app.use('/reviews', reviewsRoutes);
   app.use('/comments', commentsRoutes);
   
-  app.use(/(.*)/, (req, res) => {
-    res.status(404).json({ error: 'Route not found' });
+app.use(/(.*)/, (req, res) => {
+  res.status(404).render('error', {
+    error: 'Page not found'
   });
-};
+});
+}
 
 export default constructorMethod;
 
