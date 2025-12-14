@@ -65,7 +65,9 @@ Users can read other users’ experiences, share their own reviews, and discover
 
 ## 4. How to Run
 
+- `cd backend`
 - `npm install`
+- `npm run seed`
 - `npm start`
 -  The app will run at `http://localhost:3000`.
 
