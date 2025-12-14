@@ -119,22 +119,24 @@
   </div>
 
   <div class="park-detail-card">
-    <h2>Explore Similar Parks</h2>
+  <h2>Explore Similar Parks</h2>
 
-    <ul class="related-links">
-      <li>
-        <a href="/parks?type={{park.park_type}}">
-          View other {{park.park_type}} parks
-        </a>
-      </li>
+  <div class="explore-buttons">
+    <a
+      class="explore-btn"
+      href="/parks?type={{park.park_type}}"
+    >
+      🌱 Other {{park.park_type}} Parks
+    </a>
 
-      <li>
-        <a href="/parks?zipcode={{park.park_zip}}">
-          View parks in the same area
-        </a>
-      </li>
-    </ul>
+    <a
+      class="explore-btn"
+      href="/parks?location={{park.park_location}}"
+    >
+      📍 Parks in the Same Area
+    </a>
   </div>
+</div>
 
   <!-- Reviews -->
 <div class="reviews-section">
@@ -147,9 +149,7 @@
         <!-- Review -->
         <h3 class="review-user">{{user_name}}</h3>
 
-        <p class="review-rating">
-          <strong>Rating:</strong> {{rating}} / 5.0
-        </p>
+        <div class="star-rating" style="--rating: {{rating}};"></div>
 
         <p class="review-comment">
           {{review_content}}
@@ -221,7 +221,10 @@
       </div>
     {{/each}}
   {{else}}
-    <p>No reviews yet.</p>
+    <div class="empty-reviews">
+       <p>No reviews yet.</p>
+       <span>Be the first to share your experience 🌱</span>
+   </div>
   {{/if}}
 </div>
 
