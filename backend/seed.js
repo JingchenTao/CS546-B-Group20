@@ -1,12 +1,20 @@
 import { dbConnection, closeConnection } from './config/mongoConnection.js';
-import { parks } from './config/mongoCollections.js';
+import { parks, users, review, comment } from './config/mongoCollections.js';
 import * as usersData from './data/users.js';
+import * as parksData from './data/parks.js';
+import * as reviewData from './data/review.js';
+import * as commentData from './data/comment.js';
+// import * as historyData from './data/history.js';
+// import history from './config/mongoCollections.js';
+
+
+
 
 // Create default admin account
 const createAdminAccount = async () => {
     try {
         const adminEmail = 'admin@stevens.edu';
-        const adminPassword = 'Admin123!@#'; // Strong password: uppercase, lowercase, number, special char
+        const adminPassword = 'Admin123!@#'; 
         
         // Check if admin already exists
         try {
@@ -76,8 +84,205 @@ const createTestUsers = async () => {
     }
 };
 
-// Initialize database connection and create accounts
+// Clear all collections before seeding
+const clearAllCollections = async () => {
+  console.log('Clearing all collections...');
+  const usersCollection = await users();
+  const parksCollection = await parks();
+  const reviewCollection = await review();
+  const commentCollection = await comment();
+
+  // const historyCollection = await history();
+  // await historyCollection.deleteMany({});
+  
+  await usersCollection.deleteMany({});
+  await parksCollection.deleteMany({});
+  await reviewCollection.deleteMany({});
+  await commentCollection.deleteMany({});
+  
+  console.log('All collections cleared.');
+};
+
+// Create test reviews
+const createTestReviews = async () => {
+  try {
+    // Get created users and parks
+    const usersCollection = await users();
+    const parksCollection = await parks();
+    
+    const adminUser = await usersCollection.findOne({ email: 'admin@stevens.edu' });
+    const user1 = await usersCollection.findOne({ email: 'chenyu.liu@stevens.edu' });
+    const user2 = await usersCollection.findOne({ email: 'yunwei.li@stevens.edu' });
+    
+    if (!adminUser || !user1 || !user2) {
+      console.log('Users not found, skipping review creation');
+      return;
+    }
+    
+    // Get specific parks: Strawberry Playground and Chelsea Park
+    const strawberryPlayground = await parksCollection.findOne({ park_name: 'Strawberry Playground' });
+    const chelseaPark = await parksCollection.findOne({ park_name: 'Chelsea Park' });
+    
+    if (!strawberryPlayground || !chelseaPark) {
+      console.log('Required parks not found, skipping review creation');
+      console.log(`Strawberry Playground found: ${!!strawberryPlayground}`);
+      console.log(`Chelsea Park found: ${!!chelseaPark}`);
+      return;
+    }
+    
+    const testReviews = [
+      {
+        userId: user1._id.toString(),
+        parkId: strawberryPlayground._id.toString(),
+        rating: 5,
+        review_content: 'This is an amazing playground! Great facilities and beautiful scenery. Perfect for families with children. The equipment is well-maintained and safe. Highly recommend visiting during the weekend.'
+      },
+      {
+        userId: user2._id.toString(),
+        parkId: strawberryPlayground._id.toString(),
+        rating: 4,
+        review_content: 'Nice playground with good amenities. The play structures are well-maintained and the walking paths are clean. Could use more shade areas though, especially during summer months.'
+      },
+      {
+        userId: user1._id.toString(),
+        parkId: chelseaPark._id.toString(),
+        rating: 4,
+        review_content: 'Chelsea Park is a great neighborhood park! The facilities are good and the atmosphere is peaceful. Perfect for a quick walk or jog. Some areas could use better maintenance but overall a nice place to visit.'
+      },
+      {
+        userId: user2._id.toString(),
+        parkId: chelseaPark._id.toString(),
+        rating: 5,
+        review_content: 'Excellent park with beautiful green spaces. Very clean and well-organized. Great place for community events and gatherings. The park management does a wonderful job maintaining the facilities.'
+      }
+    ];
+    
+    let reviewCount = 0;
+    for (const reviewInfo of testReviews) {
+      try {
+        const review = await reviewData.addReview(
+          reviewInfo.userId,
+          reviewInfo.parkId,
+          reviewInfo.rating,
+          reviewInfo.review_content
+        );
+        reviewCount++;
+        console.log(`Created review by user for park: ${reviewInfo.parkId}`);
+      } catch (error) {
+        // Skip if review already exists or other error
+        console.log(`Skipping review creation: ${error.message || error}`);
+      }
+    }
+    
+    console.log(`Created ${reviewCount} test reviews`);
+  } catch (error) {
+    console.error('Error creating test reviews:', error.message);
+  }
+};
+
+// Create test comments - user1 and user2 commenting on each other's reviews
+const createTestComments = async () => {
+  try {
+    const usersCollection = await users();
+    const reviewCollection = await review();
+    
+    const user1 = await usersCollection.findOne({ email: 'chenyu.liu@stevens.edu' });
+    const user2 = await usersCollection.findOne({ email: 'yunwei.li@stevens.edu' });
+    
+    if (!user1 || !user2) {
+      console.log('Users not found, skipping comment creation');
+      return;
+    }
+    
+    // Get reviews for Strawberry Playground (should have reviews from both users)
+    const parksCollection = await parks();
+    const strawberryPlayground = await parksCollection.findOne({ park_name: 'Strawberry Playground' });
+    
+    if (!strawberryPlayground) {
+      console.log('Strawberry Playground not found, skipping comment creation');
+      return;
+    }
+    
+    // Get reviews for Strawberry Playground
+    const strawberryReviews = await reviewCollection.find({ 
+      park_id: strawberryPlayground._id 
+    }).toArray();
+    
+    if (strawberryReviews.length === 0) {
+      console.log('No reviews found for Strawberry Playground, skipping comment creation');
+      return;
+    }
+    
+    // Find user1's review on Strawberry Playground
+    const user1Review = strawberryReviews.find(r => r.user_id.toString() === user1._id.toString());
+    
+    if (!user1Review) {
+      console.log('User1 review not found, skipping comment creation');
+      return;
+    }
+    
+    // Create a conversation thread: user2 comments on user1's review, then user1 replies, then user2 replies again
+    let commentCount = 0;
+    let firstCommentId = null;
+    
+    // Step 1: user2 comments on user1's review (top-level comment)
+    try {
+      const comment1 = await commentData.addComment(
+        user2._id.toString(),
+        user1Review._id.toString(),
+        null, // top-level comment
+        'I completely agree with your review! This playground is indeed amazing. I especially love the variety of play equipment they have.'
+      );
+      firstCommentId = comment1._id;
+      commentCount++;
+      console.log('Created first comment by user2 on user1\'s review');
+    } catch (error) {
+      console.log(`Skipping first comment: ${error.message || error}`);
+      return; // If first comment fails, we can't create the conversation
+    }
+    
+    // Step 2: user1 replies to user2's comment
+    if (firstCommentId) {
+      try {
+        const comment2 = await commentData.addComment(
+          user1._id.toString(),
+          user1Review._id.toString(),
+          firstCommentId.toString(), // reply to user2's comment
+          'Thanks for your comment! Yes, the equipment variety is great. Have you tried the climbing wall? It\'s my kids\' favorite part.'
+        );
+        commentCount++;
+        console.log('Created reply comment by user1 to user2\'s comment');
+        
+        // Step 3: user2 replies to user1's reply
+        try {
+          const comment3 = await commentData.addComment(
+            user2._id.toString(),
+            user1Review._id.toString(),
+            comment2._id.toString(), // reply to user1's reply
+            'Yes! The climbing wall is fantastic. My daughter loves it too. We usually visit on weekends when it\'s less crowded.'
+          );
+          commentCount++;
+          console.log('Created reply comment by user2 to user1\'s reply');
+        } catch (error) {
+          console.log(`Skipping third comment: ${error.message || error}`);
+        }
+      } catch (error) {
+        console.log(`Skipping second comment: ${error.message || error}`);
+      }
+    }
+    
+    console.log(`Created ${commentCount} test comments (conversation thread)`);
+  } catch (error) {
+    console.error('Error creating test comments:', error.message);
+  }
+};
+
+// Initialize database connection
 const db = await dbConnection();
+
+// Clear all collections first
+await clearAllCollections();
+
 await createAdminAccount();
 await createTestUsers();
 
@@ -22919,15 +23124,18 @@ const parkData = [
 ];
 
 const parksCollection = await parks();
-
-await parksCollection.deleteMany({});
-
 const result = await parksCollection.insertMany(parkData);
 
 console.log(`Inserted ${result.insertedCount} parks`);
 
 const count = await parksCollection.countDocuments();
 console.log(`Total parks in database: ${count}`);
+
+// Create test reviews (after parks and users are created)
+await createTestReviews();
+
+// Create test comments (after reviews are created)
+await createTestComments();
 
 console.log('Done seeding database');
 
