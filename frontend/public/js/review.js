@@ -86,7 +86,7 @@ document.addEventListener('submit', async (e) => {
 
   try {
     const res = await fetch(url, {
-      method: 'POST', // 让 app.js rewrite 成 DELETE
+      method: 'POST', 
       headers: {
         'Content-Type': 'application/json'
       }

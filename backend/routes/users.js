@@ -1,3 +1,5 @@
+import * as historyData from '../data/history.js';
+
 import express from 'express';
 import * as usersController from '../controllers/users.js';
 import { adminAuthMiddleware } from '../middleware/adminAuth.js';
@@ -26,9 +28,28 @@ router.post('/login', usersController.loginUser);
 
 
 // for the user profile
-router.get('/userProfile', (req, res) => {
-    res.render('users/profile', { title: 'profile' });
-})
+router.get('/userProfile', async (req, res) => {
+  if (!req.session || !req.session.user) {
+    return res.redirect('/users/login');
+  }
+
+  try {
+    const user = req.session.user;
+
+    const viewHistory = await historyData.getHistoryByUserId(
+      user._id.toString()
+    );
+
+    return res.render('users/profile', {
+      title: 'profile',
+      user: user,
+      viewHistory: viewHistory
+    });
+  } catch (e) {
+    return res.status(500).render('error', { error: e });
+  }
+});
+
 
 
 // Get current user's profile

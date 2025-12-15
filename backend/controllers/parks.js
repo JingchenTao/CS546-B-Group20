@@ -95,7 +95,8 @@ export const createPark = async (req, res) => {
     
     const newPark = await parksData.createPark(park_name, park_location, park_zip, description, park_type, req.session.user._id.toString());
     
-    res.status(200).json(newPark);
+    res.redirect(`/parks/${newPark._id}`);
+    //res.status(200).json(newPark);
   } catch (error) {
     if (error.message && error.message.includes('Cannot find the user')) {
       return res.status(404).json({ error: error.message });

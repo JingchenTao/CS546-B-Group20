@@ -40,6 +40,76 @@
         </a>
 
       </section>
+
+<h2>Add New Park</h2>
+
+<form id="add-park-form" class="admin-add-park-form" method="POST" action="/parks">
+
+
+  <div class="form-group">
+    <label for="park_name">Park Name</label>
+    <input
+      type="text"
+      id="park_name"
+      name="park_name"
+      required
+    >
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea
+      id="description"
+      name="description"
+      rows="3"
+      required
+    ></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="park_type">Park Type</label>
+    <input
+      type="text"
+      id="park_type"
+      name="park_type"
+      required
+    >
+  </div>
+
+  <div class="form-group">
+    <label for="park_zip">Zip Code(s)</label>
+    <input
+      type="text"
+      id="park_zip"
+      name="park_zip"
+      placeholder="10024, 10025"
+      required
+    >
+  </div>
+
+  <div class="form-group">
+    <label for="park_location">Location</label>
+    <select
+      id="park_location"
+      name="park_location"
+      required
+    >
+      <option value="M">Manhattan</option>
+      <option value="B">Brooklyn</option>
+      <option value="Q">Queens</option>
+      <option value="X">Bronx</option>
+      <option value="R">Staten Island</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn">
+    ➕ Add Park
+  </button>
+
+</form>
+
+
+
       
       <script src="/public/js/profile.js"></script>
 

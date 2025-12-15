@@ -44,6 +44,19 @@
     You haven’t reviewed any parks yet.
   </p>
 </section>
+<h3>View History</h3>
+
+<ul class="view-history-list">
+  {{#each viewHistory}}
+    <li>
+      <a href="/parks/{{this.target_id}}">
+        {{this.content}}
+      </a>
+    </li>
+  {{/each}}
+</ul>
+
+
 
 <section class="action-buttons" style="margin-top: 25px; text-align: center;">
       <a href="/users/logout" class="btn logout-btn" 
@@ -58,21 +71,4 @@
 </div>
 </div>
 
-<h3>View History</h3>
 
-{{#if history.length}}
-  <ul class="history-list">
-    {{#each history}}
-      <li class="history-item">
-        <p class="history-content">
-          {{content}}
-        </p>
-        <small class="history-time">
-          {{createdAt}}
-        </small>
-      </li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No activity yet.</p>
-{{/if}}

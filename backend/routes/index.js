@@ -98,6 +98,7 @@ const constructorMethod = (app) => {
 
 
   app.use('/users', usersRoutes);
+  app.use('/parks', parksRoutes); //frontend update
   app.use('/reviews', reviewsRoutes);
   app.use('/comments', commentsRoutes);
   app.use('/history', historytsRoutes);
