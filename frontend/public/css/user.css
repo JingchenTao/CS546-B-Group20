@@ -167,3 +167,27 @@
 .profile-section .park-list li a:hover {
   text-decoration: underline;
 }
+
+
+/* view history update */
+
+.history-list {
+  list-style: none;
+  padding: 0;
+}
+
+.history-item {
+  padding: 10px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.history-content {
+  margin: 0;
+}
+
+.history-time {
+  color: #777;
+  font-size: 12px;
+}
+
+

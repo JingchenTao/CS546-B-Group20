@@ -3,6 +3,7 @@ import {ObjectId} from 'mongodb';
 import { checkId, checkIsProperRate, checkIsProperReview } from '../controllers/review.js';
 import { deleteCommentByReviewID } from './comment.js';
 import { getParkById } from './parks.js';
+import { addHistory } from './history.js';
 
 
 async function recalculateParkRating(parkId) {
@@ -107,6 +108,9 @@ const addReview = async (
     await recalculateParkRating(parkId);
 
     const addedReview = await getReviewByReviewId(insertInfo.insertedId.toString());
+    let content = `The user (${userId}) reviewed the park ${parkId}.`;
+    await addHistory(userId, addedReview._id.toString(), 'reviews', 'create', content, {before: null, after: addedReview})
+
     return addedReview;
 };
 
@@ -115,12 +119,20 @@ const addReview = async (
 const updateReview = async (
     reviewId,
     newRating,
-    newContent
+    newContent,
+    userId
 ) =>   {
     reviewId = checkId(reviewId, 'review ID');
+    userId = checkId(userId, 'user ID');
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
     newRating = checkIsProperRate(newRating, 'new rating');
     newContent = checkIsProperReview(newContent, 'new review content');
     let currentReview = await getReviewByReviewId(reviewId);
+    if( userId !== currentReview.user_id.toString() && user.role !== 'admin'){
+        throw 'Only current user or admin can edit the review.'
+    }
     const reviewsCollection = await reviews();
     const updatedInfo = await reviewsCollection.findOneAndUpdate(
         {_id: new ObjectId(reviewId)},
@@ -135,6 +147,8 @@ const updateReview = async (
     }  
     await recalculateParkRating(currentReview.park_id.toString());
     updatedInfo._id = updatedInfo._id.toString();
+    let content = `The user (${userId}) updated the review ${reviewId}.`;
+    await addHistory(userId, reviewId, 'reviews', 'update', content, {before: currentReview, after: updatedInfo})
     return updatedInfo;
 }
 
@@ -142,10 +156,20 @@ const updateReview = async (
 
 
 const deleteReviewByReviewId = async (
-    reviewId
+    reviewId,
+    userId
 ) =>   {
     reviewId = checkId(reviewId, 'review ID');
+    userId = checkId(userId, 'user ID');
+    const usersCollection = await users();
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if(!user){ throw `Could not find this user ID ( ${userId} ) !` };
     const currentReview =  await getReviewByReviewId(reviewId);
+    if( userId !== currentReview.user_id.toString() && user.role !== 'admin'){
+        throw 'Only current user or admin can delete the review.'
+    }
+
+
     const reviewsCollection = await reviews();
     const deletionResult = await reviewsCollection.deleteOne({_id: new ObjectId(reviewId)});
     if (deletionResult.deletedCount === 0) {
@@ -153,21 +177,23 @@ const deleteReviewByReviewId = async (
     }
 
     Promise.resolve().then(async () => {
-    try {
-        await recalculateParkRating(currentReview.park_id.toString());
-    } catch (e) {
-        console.error('[WARN] recalc rating failed', e);
-    }
+        try {
+            await recalculateParkRating(currentReview.park_id.toString());
+        } catch (e) {
+            console.error('[WARN] recalc rating failed', e);
+        }
 
-    try {
-        await deleteCommentByReviewID(reviewId);
-    } catch (e) {
-        console.error('[WARN] delete comments failed', e);
-    }
-});
+        try {
+            await deleteCommentByReviewID(reviewId);
+        } catch (e) {
+            console.error('[WARN] delete comments failed', e);
+        }
+    });
+    
+    let content = `The user (${userId}) deleted the review ${reviewId}.`;
+    await addHistory(userId, reviewId, 'reviews', 'delete', content, {before: currentReview, after: null})
     return {review_id: reviewId, deleted: true};
 }
-
 
 
 export {

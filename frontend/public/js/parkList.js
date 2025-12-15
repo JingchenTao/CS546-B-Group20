@@ -26,30 +26,50 @@
 
 
   const renderParks = () => {
+    container.textContent = '';
+    
     if (!allParks || allParks.length === 0) {
-      container.innerHTML = '<p>No parks found.</p>';
-      updatePagination();
-      return;
-    }
+    const p = document.createElement('p');
+    p.textContent = 'No parks found.';
+    container.appendChild(p);
+    updatePagination();
+    return;
+  }
     
     const start = (currentPage - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
     const pageParks = allParks.slice(start, end);
 
-    container.innerHTML = pageParks.map(p => `
-      <div class="park-card">
-        <h2>${p.park_name}</h2>
-        <p><strong>Location:</strong> ${p.park_location}</p>
-        <p><strong>Type:</strong> ${p.park_type}</p>
-        <p class="park-meta">
-          <span>⭐ ${p.rating} / 5</span>
-          <span>📝 ${p.reviewCount ?? 0}</span>
-        </p>
-        <a href="/parks/${p._id}">View Details</a>
-      </div>
-    `).join('');
+    for (const p of pageParks) {
+    const card = document.createElement('div');
+    card.className = 'park-card';
 
-     updatePagination();
+    const h2 = document.createElement('h2');
+    h2.textContent = p.park_name ?? '';
+    card.appendChild(h2);
+
+    const loc = document.createElement('p');
+    loc.textContent = `Location: ${p.park_location ?? ''}`;
+    card.appendChild(loc);
+
+    const type = document.createElement('p');
+    type.textContent = `Type: ${p.park_type ?? ''}`;
+    card.appendChild(type);
+
+    const meta = document.createElement('p');
+    meta.className = 'park-meta';
+    meta.textContent = `⭐ ${p.rating ?? 0} / 5  📝 ${p.reviewCount ?? 0}`;
+    card.appendChild(meta);
+
+    const a = document.createElement('a');
+    a.textContent = 'View Details';
+    a.href = `/parks/${encodeURIComponent(String(p._id ?? ''))}`;
+    card.appendChild(a);
+
+    container.appendChild(card);
+  }
+
+  updatePagination();
   };
     
     //read query from URL

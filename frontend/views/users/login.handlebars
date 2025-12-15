@@ -3,6 +3,12 @@
 
 <h1>Login</h1>
 
+{{#if error}}
+  <div class="error-message" role="alert" style="color: red; margin-top: 10px;">
+    {{error}}
+  </div>
+{{/if}}
+
 <form class="login-form" method="POST" action="/users/login">
   <div class="form-group">
     <label for="email">Email:</label>
@@ -16,6 +22,10 @@
 
   <button type="submit" class="submit-btn">Login</button>
 </form>
+
+<div class="register-link" style="margin-top: 15px; text-align: center;">
+      <p>If you do not have an account <a href="/users/register">Sign up here</a></p>
+    </div>
 
 <script src="/public/js/login.js"></script>
 

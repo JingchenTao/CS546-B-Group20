@@ -7,20 +7,20 @@
 
   <section class="profile-info">
     <div class="profile-field">
-      <label>Name</label>
+      <h3>Name:</h3>
       <div class="profile-value" id="profile-name">
         <!-- Name + Email + Address -->
       </div>
     </div>
 
     <div class="profile-field">
-      <label>Email</label>
+      <h3>Email:</h3>
       <div class="profile-value" id="profile-email">
       </div>
     </div>
 
     <div class="profile-field">
-      <label>Address</label>
+      <h3>Address:</h3>
       <div class="profile-value" id="profile-address">
       </div>
     </div>
@@ -45,8 +45,34 @@
   </p>
 </section>
 
+<section class="action-buttons" style="margin-top: 25px; text-align: center;">
+      <a href="/users/logout" class="btn logout-btn" 
+        style="padding: 10px 20px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px;">
+          Log Out
+      </a>
+</section>
+
 <script src="/public/js/profile.js"></script>
 
   </div>
 </div>
 </div>
+
+<h3>View History</h3>
+
+{{#if history.length}}
+  <ul class="history-list">
+    {{#each history}}
+      <li class="history-item">
+        <p class="history-content">
+          {{content}}
+        </p>
+        <small class="history-time">
+          {{createdAt}}
+        </small>
+      </li>
+    {{/each}}
+  </ul>
+{{else}}
+  <p>No activity yet.</p>
+{{/if}}

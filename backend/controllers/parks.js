@@ -30,11 +30,21 @@ export const getParkById = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    const park = await parksData.getParkById(id);
+    let viewedbyId;
+    if (!req.session || !req.session.user) {
+        viewedbyId = null;
+    } else {
+        viewedbyId = req.session.user._id.toString();
+    }
+    
+    const park = await parksData.getParkById(id, viewedbyId);
     
     res.status(200).json(park);
   } catch (error) {
     if (error.message && error.message.includes('No park found')) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message && error.message.includes('User not found')) {
       return res.status(404).json({ error: error.message });
     }
     if (error.message && error.message.includes('validation failed')) {
@@ -83,10 +93,13 @@ export const createPark = async (req, res) => {
       return res.status(400).json({ error: 'All fields must be provided' });
     }
     
-    const newPark = await parksData.createPark(park_name, park_location, park_zip, description, park_type);
+    const newPark = await parksData.createPark(park_name, park_location, park_zip, description, park_type, req.session.user._id.toString());
     
     res.status(200).json(newPark);
   } catch (error) {
+    if (error.message && error.message.includes('Cannot find the user')) {
+      return res.status(404).json({ error: error.message });
+    }
     if (error.message && error.message.includes('already exists')) {
       return res.status(409).json({ error: error.message });
     }
@@ -110,11 +123,14 @@ export const updatePark = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    const updatedPark = await parksData.updatePark(id, updateData);
+    const updatedPark = await parksData.updatePark(id, updateData, req.session.user._id.toString());
     
     res.status(200).json(updatedPark);
   } catch (error) {
     if (error.message && error.message.includes('No park found')) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message && error.message.includes('Cannot find the user')) {
       return res.status(404).json({ error: error.message });
     }
     if (error.message && error.message.includes('validation failed')) {
@@ -130,6 +146,7 @@ export const updatePark = async (req, res) => {
   }
 };
 
+
 export const deletePark = async (req, res) => {
   try {
     const { id } = req.params;
@@ -142,11 +159,14 @@ export const deletePark = async (req, res) => {
       return res.status(400).json({ error: 'Park ID must be a valid ObjectId' });
     }
     
-    const result = await parksData.deletePark(id);
+    const result = await parksData.deletePark(id, req.session.user._id.toString());
     
     res.status(200).json(result);
   } catch (error) {
     if (error.message && error.message.includes('No park found')) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message && error.message.includes('Cannot find the user')) {
       return res.status(404).json({ error: error.message });
     }
     if (error.message && error.message.includes('validation failed')) {
@@ -155,6 +175,7 @@ export const deletePark = async (req, res) => {
     res.status(500).json({ error: error.message || 'Internal server error' });
   }
 };
+
 
 export const reParkRating = async (req, res) => {
   try {

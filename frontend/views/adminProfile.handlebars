@@ -6,7 +6,21 @@
 
       <section class="profile-info">
         <div class="profile-field">
-          <label>Role</label>
+          <h3>Name:</h3>
+          <div class="profile-value" id="profile-name">
+            Loading... 
+          </div>
+        </div>
+
+        <div class="profile-field">
+          <h3>Email:</h3>
+          <div class="profile-value" id="profile-email">
+            Loading...
+          </div>
+        </div>
+        
+        <div class="profile-field">
+          <h3>Role:</h3>
           <div class="profile-value">
             Administrator
           </div>
@@ -16,10 +30,18 @@
       <section class="admin-actions">
         <h2>Admin Actions</h2>
 
-        <a href="/parks" class="admin-btn">
+        <a href="/parks" class="admin-btn" style="margin-bottom: 10px; display: block;">
           Manage Parks
         </a>
+        
+        <a href="/users/logout" class="admin-btn logout-btn" 
+           style="background-color: #dc3545; display: block; margin-top: 20px;">
+          Log Out
+        </a>
+
       </section>
+      
+      <script src="/public/js/profile.js"></script>
 
     </div>
   </div>

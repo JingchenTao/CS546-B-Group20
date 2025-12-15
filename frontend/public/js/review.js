@@ -12,13 +12,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const ratingInput = form.querySelector('input[name="rating"]');
     const contentInput = form.querySelector('textarea[name="review_content"]');
 
-    const rating = ratingInput?.value.trim();
+    let rating = ratingInput?.value.trim();
     const review_content = contentInput?.value.trim();
 
-    if (!rating || !review_content) {
-      showError('Please fill out all required fields.');
-      return;
-    }
+
+     rating = Number(rating);
+
+
+
+        
+    if (typeof rating === 'undefined' || rating === null  
+        || isNaN(rating) || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+          showError(`Provided input rating should be an integer rate, choosing form 1 to 5!`);
+          return
+      }
+    
+      if (review_content === undefined || review_content === null || typeof review_content !== 'string' || 
+        review_content.length < 10 || review_content.length > 1000 || /(.)\1{4,}/.test(review_content)) {
+      
+             
+            showError('This review must be at least 10 characters long and no more than 1000 characters long. And it should not have the same character repeated 5 times or more. ');
+            return
+        }
 
     try {
       const res = await fetch(form.action, {

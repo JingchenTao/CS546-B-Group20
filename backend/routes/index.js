@@ -2,7 +2,7 @@ import parksRoutes from './parks.js';
 import usersRoutes from './users.js';
 import reviewsRoutes from './review.js';
 import commentsRoutes from './comment.js';
-
+import historytsRoutes from './history.js';
 import * as parksData from '../data/parks.js'; //frontend update
 import * as reviewData from '../data/review.js';
 import * as commentData from '../data/comment.js';
@@ -36,7 +36,14 @@ const constructorMethod = (app) => {
   try {
     const parkId = req.params.id;
 
-    const park = await parksData.getParkById(parkId);
+    let userInfo;
+    if(!req.session || !req.session.user) {
+      userInfo = null;
+    } else {
+      userInfo = req.session.user._id;
+    }
+
+    const park = await parksData.getParkById(parkId, userInfo);
     const reviewsRaw = await reviewData.getReviewsByParkId(parkId);
     
     const currentUserId = req.session?.user?._id;
@@ -93,6 +100,7 @@ const constructorMethod = (app) => {
   app.use('/users', usersRoutes);
   app.use('/reviews', reviewsRoutes);
   app.use('/comments', commentsRoutes);
+  app.use('/history', historytsRoutes);
   
 app.use(/(.*)/, (req, res) => {
   res.status(404).render('error', {
