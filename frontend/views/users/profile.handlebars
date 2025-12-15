@@ -57,3 +57,22 @@
   </div>
 </div>
 </div>
+
+<h3>View History</h3>
+
+{{#if history.length}}
+  <ul class="history-list">
+    {{#each history}}
+      <li class="history-item">
+        <p class="history-content">
+          {{content}}
+        </p>
+        <small class="history-time">
+          {{createdAt}}
+        </small>
+      </li>
+    {{/each}}
+  </ul>
+{{else}}
+  <p>No activity yet.</p>
+{{/if}}

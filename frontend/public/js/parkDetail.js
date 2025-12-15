@@ -160,3 +160,101 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Edit comment
+document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const form = btn.nextElementSibling;
+    if (!form) return;
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+});
+
+// submit
+document.querySelectorAll('.edit-comment-form').forEach(form => {
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const commentId = form.dataset.commentId;
+    const content = form.querySelector('textarea[name="comment_content"]').value.trim();
+
+    if (content.length < 5 || content.length > 1000) {
+      alert('Comment content length is invalid');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/comments/${commentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          comment_content: content
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to update comment');
+        return;
+      }
+
+      window.location.reload();
+    } catch {
+      alert('Network error');
+    }
+  });
+});
+
+// Edit review
+document.querySelectorAll('.edit-review-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const form = btn.nextElementSibling;
+    if (!form) return;
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+});
+
+// submit
+document.querySelectorAll('.edit-review-form').forEach(form => {
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const reviewId = form.dataset.reviewId;
+    const rating = Number(form.querySelector('input[name="rating"]').value);
+    const content = form.querySelector('textarea[name="review_content"]').value.trim();
+
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      alert('Rating must be an integer between 1 and 5');
+      return;
+    }
+
+    if (content.length < 10 || content.length > 1000) {
+      alert('Review content length is invalid');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/reviews/${reviewId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          rating,
+          review_content: content
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to update review');
+        return;
+      }
+
+      window.location.reload();
+    } catch {
+      alert('Network error');
+    }
+  });
+});
+
