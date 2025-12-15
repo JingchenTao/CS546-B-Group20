@@ -148,3 +148,35 @@
   line-height: 1.5;
   margin-bottom: 14px;
 }
+
+
+/* Comment and Review Button Update */
+.review-card button,
+.comment-item button {
+  padding: 6px 14px;
+  font-size: 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 8px;
+}
+.delete-btn {
+  background-color: #cfe3c1;
+  color: #1f4d2b;
+}
+
+.delete-btn:hover {
+  background-color: #b8d6a7;
+}
+.review-card button:not(.delete-btn),
+.comment-item button:not(.delete-btn) {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.review-card button:not(.delete-btn):hover,
+.comment-item button:not(.delete-btn):hover {
+  background-color: #e0e0e0;
+}
+
