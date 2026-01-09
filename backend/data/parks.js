@@ -3,6 +3,7 @@ import { parks } from '../config/mongoCollections.js';
 import { review } from '../config/mongoCollections.js';
 import { comment } from '../config/mongoCollections.js';
 import { users } from '../config/mongoCollections.js';
+import { addHistory } from './history.js';
 import {
   validateParkName,
   validateParkLocation,
@@ -62,6 +63,7 @@ export const buildQuery = (reqQuery) => {
   
   return query;
 };
+
 
 export const getAllParks = async (search, location, type, zipcode, minRating, sort) => {
   try {
@@ -158,7 +160,8 @@ export const getAllParks = async (search, location, type, zipcode, minRating, so
   }
 };
 
-export const getParkById = async (parkId) => {
+
+export const getParkById = async (parkId, user_id = null) => {
   try {
     let trimmedId;
     try {
@@ -166,18 +169,32 @@ export const getParkById = async (parkId) => {
     } catch (error) {
       throw new Error(`Park ID validation failed: ${error.message || error}`);
     }
-    
+
     const parksCollection = await parks();
     const park = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     
     if (!park) {
-      throw 'No park found with that ID';
+      throw new Error('No park found with that ID');
     }
-    
     const reviewCollection = await review();
     const reviewCount = await reviewCollection.countDocuments({ park_id: new ObjectId(trimmedId) });
     park.reviewCount = reviewCount;
-    
+
+    if (user_id){
+        try {
+            user_id = validateObjectId(user_id);
+        } catch (error) {
+            throw new Error(`User ID validation failed: ${error.message || error}`);
+        }
+        const usersCollection = await users();
+        const viewedBy = await usersCollection.findOne({ _id: new ObjectId(user_id) });
+        if (!viewedBy) {
+            throw new Error('User not found');
+        }
+        let content = `The park (${trimmedId}) was viewed by ${user_id}`;
+        await addHistory(user_id, trimmedId, 'parks', 'view', content, {before: null, after:null})  
+    }
+
     return convertParkObjectIds(park);
   } catch (error) {
     if (error.message && error.message.includes('Failed to connect to database')) {
@@ -186,6 +203,7 @@ export const getParkById = async (parkId) => {
     throw new Error(`Error getting park by ID: ${error.message || error}`);
   }
 };
+
 
 export const getPopularParks = async (limit) => {
   try {
@@ -213,6 +231,7 @@ export const getPopularParks = async (limit) => {
     throw new Error(`Error getting popular parks: ${error.message || error}`);
   }
 };
+
 
 export const getRecommendParks = async ({ zipcode, location }) => {
   try {
@@ -247,14 +266,14 @@ export const getRecommendParks = async ({ zipcode, location }) => {
   }
 };
 
-export const createPark = async (park_name, park_location, park_zip, description, park_type) => {
+export const createPark = async (park_name, park_location, park_zip, description, park_type, user_id) => {
   try {
     if (park_name === undefined || park_location === undefined || park_zip === undefined || 
-        description === undefined || park_type === undefined) {
-      throw 'All parameters must be provided';
+        description === undefined || park_type === undefined || user_id === undefined) {
+      throw new Error( 'All parameters must be provided');
     }
     
-    let trimmedParkName, validatedLocation, validatedZip, trimmedDescription, trimmedParkType;
+    let trimmedParkName, validatedLocation, validatedZip, trimmedDescription, trimmedParkType, trimmedUserId;
     
     try {
       trimmedParkName = validateParkName(trimString(park_name));
@@ -285,6 +304,12 @@ export const createPark = async (park_name, park_location, park_zip, description
     } catch (error) {
       throw new Error(`Park type validation failed: ${error.message || error}`);
     }
+
+    try {
+      trimmedUserId = validateObjectId(trimString(user_id));
+    } catch (error) {
+      throw new Error(`User id validation failed: ${error.message || error}`);
+    }
     
     const parksCollection = await parks();
     
@@ -292,8 +317,21 @@ export const createPark = async (park_name, park_location, park_zip, description
      { park_name: trimmedParkName.toLowerCase() });
     
     if (existingPark) {
-      throw 'A park with this name already exists';
+      throw new Error('A park with this name already exists');
     }
+
+    const usersCollection = await users();
+    
+    const existingUser = await usersCollection.findOne({ _id:  new ObjectId(trimmedUserId)});
+    
+    if (!existingUser) {
+      throw new Error( 'Cannot find the user');
+    }
+
+    if(existingUser.role !== 'admin'){
+      throw new Error( 'Only admin can create the park');
+    }
+
     
     const newPark = {
       park_name: trimmedParkName.toLowerCase(),
@@ -307,12 +345,16 @@ export const createPark = async (park_name, park_location, park_zip, description
     
     const insertInfo = await parksCollection.insertOne(newPark);
     
-    if (insertInfo.insertedCount === 0) {
-      throw 'Could not add park';
+    if (!insertInfo || !insertInfo.acknowledged || !insertInfo.insertedId) {
+      throw new Error( 'Could not add park');
     }
     
-    const insertedPark = await parksCollection.findOne({ _id: insertInfo.insertedId });
-    return convertParkObjectIds(insertedPark);
+    const insertedPark = convertParkObjectIds( await parksCollection.findOne({ _id: insertInfo.insertedId }));
+
+    let content = `The park (${insertedPark._id.toString()}) was created by  ${trimmedUserId.toString()}`;
+    await addHistory(trimmedUserId.toString(), insertedPark._id.toString(), 'parks', 'create', content, {before: null, after:insertedPark})
+
+    return insertedPark;
   } catch (error) {
     if (error.message && error.message.includes('Failed to connect to database')) {
       throw error;
@@ -321,26 +363,46 @@ export const createPark = async (park_name, park_location, park_zip, description
   }
 };
 
-export const updatePark = async (parkId, updateData) => {
+
+export const updatePark = async (parkId, updateData,  user_id) => {
   try {
     let trimmedId;
+    let trimmedUserId;
     try {
       trimmedId = validateObjectId(parkId);
     } catch (error) {
       throw new Error(`Park ID validation failed: ${error.message || error}`);
     }
+
+    try {
+      trimmedUserId = validateObjectId(trimString(user_id));
+    } catch (error) {
+      throw new Error(`User id validation failed: ${error.message || error}`);
+    }
     
     if (!updateData || typeof updateData !== 'object' || Array.isArray(updateData)) {
-      throw 'Update data must be an object';
+      throw new Error( 'Update data must be an object');
     }
     
     const parksCollection = await parks();
     
     const existingPark = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     if (!existingPark) {
-      throw 'No park found with that ID';
+      throw new Error( 'No park found with that ID');
     }
     
+    const usersCollection = await users();
+    
+    const existingUser = await usersCollection.findOne({ _id:  new ObjectId(trimmedUserId)});
+    
+    if (!existingUser) {
+      throw new Error( 'Cannot find the user');
+    }
+
+    if(existingUser.role !== 'admin'){
+      throw new Error( 'Only admin can update the park');
+    }
+
     const updateObj = {};
     
     if (updateData.park_name !== undefined) {
@@ -351,9 +413,9 @@ export const updatePark = async (parkId, updateData) => {
           _id: { $ne: new ObjectId(trimmedId) }
         });
         if (duplicatePark) {
-          throw 'A park with this name already exists';
+          throw new Error( 'A park with this name already exists');
         }
-        updateObj.park_name = trimmedParkName;
+        updateObj.park_name = trimmedParkName.toLowerCase();
       } catch (error) {
         throw new Error(`Park name validation failed: ${error.message || error}`);
       }
@@ -392,7 +454,7 @@ export const updatePark = async (parkId, updateData) => {
     }
     
     if (updateData.rating !== undefined) {
-      throw 'Rating cannot be modified directly.';
+      throw new Error( 'Rating cannot be modified directly.');
     }
     
     if (Object.keys(updateObj).length === 0) {
@@ -404,11 +466,17 @@ export const updatePark = async (parkId, updateData) => {
       { $set: updateObj }
     );
     
-    if (updateInfo.modifiedCount === 0) {
-      throw 'Could not update park';
+    if (updateInfo.matchedCount === 0) {
+      throw new Error( 'Could not update park');
     }
     
     const updatedPark = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
+
+    if (updateInfo.modifiedCount > 0){
+      let content = `The park (${trimmedId.toString()}) was updated by  ${trimmedUserId.toString()}`;
+      await addHistory(trimmedUserId.toString(), trimmedId.toString(), 'parks', 'update', content, {before: existingPark, after:updatedPark})
+
+    }
     return convertParkObjectIds(updatedPark);
   } catch (error) {
     if (error.message && error.message.includes('Failed to connect to database')) {
@@ -418,6 +486,7 @@ export const updatePark = async (parkId, updateData) => {
   }
 };
 
+
 const deleteParkCascade = async (parkId) => {
   try {
     const reviewCollection = await review();
@@ -425,41 +494,13 @@ const deleteParkCascade = async (parkId) => {
     const usersCollection = await users();
     
     const parkReviews = await reviewCollection.find({ park_id: new ObjectId(parkId.toString()) }).toArray();
-    
-    let deleteReviewFn, deleteCommentsByReviewIdFn;
-    try {
-      const reviewModule = await import('./review.js');
-      deleteReviewFn = reviewModule.deleteReview;
-    } catch (e) {
-      deleteReviewFn = null;
-    }
-    try {
-      const commentModule = await import('./comment.js');
-      deleteCommentsByReviewIdFn = commentModule.deleteCommentsByReviewId;
-    } catch (e) {
-      deleteCommentsByReviewIdFn = null;
-    }
-    
+        
     for (let reviewDoc of parkReviews) {
-      if (deleteCommentsByReviewIdFn) {
-        try {
-          await deleteCommentsByReviewIdFn(reviewDoc._id.toString());
-        } catch (error) {
-          await commentCollection.deleteMany({ review_id: new ObjectId(reviewDoc._id.toString()) });
-        }
-      } else {
-        await commentCollection.deleteMany({ review_id: new ObjectId(reviewDoc._id.toString()) });
-      }
-      
-      if (deleteReviewFn) {
-        try {
-          await deleteReviewFn(reviewDoc._id.toString());
-        } catch (error) {
-          await reviewCollection.deleteOne({ _id: reviewDoc._id });
-        }
-      } else {
-        await reviewCollection.deleteOne({ _id: reviewDoc._id });
-      }
+
+      await commentCollection.deleteMany({ review_id: new ObjectId(reviewDoc._id.toString()) });
+
+      await reviewCollection.deleteOne({ _id: reviewDoc._id });
+
     }
     
     await usersCollection.updateMany(
@@ -478,13 +519,34 @@ const deleteParkCascade = async (parkId) => {
   }
 };
 
-export const deletePark = async (parkId) => {
+
+export const deletePark = async (parkId, userId) => {
   try {
     let trimmedId;
+    
     try {
       trimmedId = validateObjectId(parkId);
     } catch (error) {
       throw new Error(`Park ID validation failed: ${error.message || error}`);
+    }
+
+    let trimmedUserId;
+    try {
+      trimmedUserId = validateObjectId(trimString(userId));
+    } catch (error) {
+      throw new Error(`User id validation failed: ${error.message || error}`);
+    }
+
+    const usersCollection = await users();
+    
+    const existingUser = await usersCollection.findOne({ _id:  new ObjectId(trimmedUserId)});
+    
+    if (!existingUser) {
+      throw new Error( 'Cannot find the user');
+    }
+    
+    if (existingUser.role !== 'admin') {
+      throw new Error('Only admin can delete parks');
     }
     
     const parksCollection = await parks();
@@ -492,17 +554,20 @@ export const deletePark = async (parkId) => {
     const park = await parksCollection.findOne({ _id: new ObjectId(trimmedId) });
     
     if (!park) {
-      throw 'No park found with that ID';
+      throw new Error('No park found with that ID');
     }
     
+
     await deleteParkCascade(trimmedId);
     
     const deleteInfo = await parksCollection.deleteOne({ _id: new ObjectId(trimmedId) });
     
     if (deleteInfo.deletedCount === 0) {
-      throw 'Could not remove park';
+      throw new Error('Could not remove park');
     }
     
+    let content = `The park (${trimmedId.toString()}) was deleted by  ${trimmedUserId.toString()}`;
+      await addHistory(trimmedUserId.toString(), trimmedId.toString(), 'parks', 'delete', content, {before: park, after:null})
     return {
       park_name: park.park_name,
       deleted: true

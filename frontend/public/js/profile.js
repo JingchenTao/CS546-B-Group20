@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('profile.js loaded');
+
 
   try {
     const response = await fetch('/users/me', {
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const user = await response.json();
-    console.log('user from /users/me:', user);
 
     // Name
     const nameElement = document.getElementById('profile-name');
@@ -67,14 +66,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       favoriteParks.forEach((park) => {
         const li = document.createElement('li');
-        li.innerHTML = `
-          <a href="/parks/${park._id}">
-            ${park.park_name}
-          </a>
-          <span class="favorite-rating">
-            ⭐ ${park.rating ?? 'N/A'}
-          </span>
-        `;
+        const a = document.createElement('a');
+        a.href = `/parks/${park._id}`;
+        a.textContent = park.park_name;
+        const ratingField = document.createElement('span');
+        ratingField.className = 'favorite-rating';
+        ratingField.textContent = ` ⭐ ${park.rating ?? 'N/A'}`; 
+        li.appendChild(a);
+        li.appendChild(ratingField);
         favoritesList.appendChild(li);
       });
     }
@@ -104,9 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           reviewedList.innerHTML = '';
           reviewedParks.forEach((park) => {
             const li = document.createElement('li');
-            li.innerHTML = `
-              <a href="/parks/${park._id}">${park.park_name}</a>
-            `;
+            const a = document.createElement('a');
+            a.href = `/parks/${park._id}`;
+            a.textContent = park.park_name; 
+            li.appendChild(a);
             reviewedList.appendChild(li);
           });
         }
@@ -128,7 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (emailElement) emailElement.textContent = 'Error loading data';
     if (addressElement) addressElement.textContent = 'Error loading data';
 
-    alert(`Error: ${error.message || 'Failed to load profile information'}`);
   }
 });
 

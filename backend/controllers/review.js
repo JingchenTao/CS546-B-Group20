@@ -21,6 +21,7 @@ function checkId(id, variableName) {
     return id;
 }
 
+
 function checkIsProperRate(rate, variableName){
     if (typeof rate === 'undefined' || rate === null || typeof rate !== 'number' 
         || isNaN(rate) || !Number.isInteger(rate) || rate < 1 || rate > 5) {

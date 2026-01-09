@@ -13,20 +13,41 @@ document.addEventListener('DOMContentLoaded', () => {
       const ratingInput = reviewForm.querySelector('input[name="rating"]');
       const commentInput = reviewForm.querySelector('textarea[name="review_content"]');
 
-      const rating = ratingInput ? ratingInput.value.trim() : '';
+      let rating = ratingInput ? ratingInput.value.trim() : '';
+
       const comment = commentInput ? commentInput.value.trim() : '';
 
-      if (!rating || !comment) {
-        e.preventDefault();
+      rating = Number(rating);
 
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = 'Please fill out all required fields.';
-        errorDiv.style.color = 'red';
-        errorDiv.style.marginTop = '10px';
 
-        reviewForm.appendChild(errorDiv);
+
+        
+    if (typeof rating === 'undefined' || rating === null  
+        || isNaN(rating) || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+          e.preventDefault();
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'error-message';
+          errorDiv.textContent = `Provided input rating should be an integer rate, choosing form 1 to 5!`;
+          errorDiv.style.color = 'red';
+          errorDiv.style.marginTop = '10px';
+
+          reviewForm.appendChild(errorDiv);
+          return
       }
+    
+      if (comment === undefined || comment === null || typeof comment !== 'string' || 
+        comment.length < 10 || comment.length > 1000 || /(.)\1{4,}/.test(comment)) {
+            e.preventDefault();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = 'This review must be at least 10 characters long and no more than 1000 characters long. And it should not have the same character repeated 5 times or more. ';
+            errorDiv.style.color = 'red';
+            errorDiv.style.marginTop = '10px';
+
+            reviewForm.appendChild(errorDiv);
+            return
+        }
     });
   }
 
@@ -139,3 +160,101 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Edit comment
+document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const form = btn.nextElementSibling;
+    if (!form) return;
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+});
+
+// submit
+document.querySelectorAll('.edit-comment-form').forEach(form => {
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const commentId = form.dataset.commentId;
+    const content = form.querySelector('textarea[name="comment_content"]').value.trim();
+
+    if (content.length < 5 || content.length > 1000) {
+      alert('Comment content length is invalid');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/comments/${commentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          comment_content: content
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to update comment');
+        return;
+      }
+
+      window.location.reload();
+    } catch {
+      alert('Network error');
+    }
+  });
+});
+
+// Edit review
+document.querySelectorAll('.edit-review-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const form = btn.nextElementSibling;
+    if (!form) return;
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  });
+});
+
+// submit
+document.querySelectorAll('.edit-review-form').forEach(form => {
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const reviewId = form.dataset.reviewId;
+    const rating = Number(form.querySelector('input[name="rating"]').value);
+    const content = form.querySelector('textarea[name="review_content"]').value.trim();
+
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      alert('Rating must be an integer between 1 and 5');
+      return;
+    }
+
+    if (content.length < 10 || content.length > 1000) {
+      alert('Review content length is invalid');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/reviews/${reviewId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          rating,
+          review_content: content
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to update review');
+        return;
+      }
+
+      window.location.reload();
+    } catch {
+      alert('Network error');
+    }
+  });
+});
+

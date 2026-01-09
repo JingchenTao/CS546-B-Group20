@@ -260,3 +260,25 @@
   color: #2c593a;
 }
 
+
+/* === Profile === */
+a[href*="register"] {
+  margin-left: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background-color: #e8f5ec;
+  color: #2c593a !important;
+  text-decoration: none !important;
+  font-weight: 500;
+  display: inline-block;
+}
+a[href*="register"]:hover {
+  background-color: #cfe8d6;
+}
+p:has(a[href*="register"]) {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-top: 20px;
+}
+

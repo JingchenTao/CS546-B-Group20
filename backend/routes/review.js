@@ -60,7 +60,7 @@ router
 
     let reviewInfo;
     try {
-      reviewInfo = await reviewMethod.deleteReviewByReviewId(req.params.reviewId);
+      reviewInfo = await reviewMethod.deleteReviewByReviewId(req.params.reviewId, req.session.user._id.toString());
 
       return res.status(200).json(reviewInfo);
 
@@ -116,7 +116,7 @@ router
 
     let reviewInfo;
     try {
-      reviewInfo = await reviewMethod.updateReview(req.params.reviewId, reviewData.rating, reviewData.review_content);
+      reviewInfo = await reviewMethod.updateReview(req.params.reviewId, reviewData.rating, reviewData.review_content, req.session.user._id.toString());
 
       return res.status(200).json(reviewInfo);
 

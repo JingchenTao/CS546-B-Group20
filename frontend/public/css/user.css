@@ -167,3 +167,38 @@
 .profile-section .park-list li a:hover {
   text-decoration: underline;
 }
+
+
+/* view history update */
+
+.view-history-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 12px;
+}
+
+.view-history-list li {
+  background-color: #f5f9f6;
+  border-left: 4px solid #7fbf9c;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #355f45;
+}
+
+.view-history-list li a {
+  text-decoration: none;
+  color: #2e7d5b;
+  font-weight: 500;
+  word-break: break-all;
+  opacity: 0.85;
+}
+
+.view-history-list li a:hover {
+  text-decoration: underline;
+  color: #1f5e42;
+}
+
+

@@ -155,6 +155,46 @@
           {{review_content}}
         </p>
 
+        <!-- Edit Review -->
+
+        {{#if isOwner}}
+          <button
+            type="button"
+            class="edit-review-btn"
+           data-review-id="{{_id}}">
+           Edit Review
+          </button>
+
+          <form
+            class="edit-review-form"
+            data-review-id="{{_id}}"
+            style="display:none; margin-top: 10px;"
+        >
+         <div class="form-group">
+           <label>Rating</label>
+           <input
+            type="number"
+            name="rating"
+            min="1"
+            max="5"
+            value="{{rating}}"
+            required
+          />
+         </div>
+
+         <div class="form-group">
+           <label>Review</label>
+           <textarea
+            name="review_content"
+            rows="3"
+            required
+          >{{review_content}}</textarea>
+         </div>
+
+      <button type="submit">Save</button>
+      </form>
+      {{/if}}
+
         <!-- delete review -->
         {{#if isOwner}}
           <form
@@ -176,7 +216,32 @@
               {{#each comments}}
                 <li class="comment-item">
                   <p class="comment-user">{{user_name}}</p>
+
                   <p class="comment-text">{{comment_content}}</p>
+
+                  <!-- Edit comment -->
+                    {{#if isOwner}}
+                      <button
+                       type="button"
+                       class="edit-comment-btn"
+                       data-comment-id="{{_id}}">
+                            Edit
+                      </button>
+
+                      <form
+                       class="edit-comment-form"
+                       data-comment-id="{{_id}}"
+                       style="display:none; margin-top: 5px;"
+                      >
+                     <textarea
+                       name="comment_content"
+                       rows="2"
+                       required
+                     >{{comment_content}}</textarea>
+
+                  <button type="submit">Save</button>
+                  </form>
+                {{/if}}
 
                   {{#if isOwner}}
                     <form
@@ -228,23 +293,28 @@
   {{/if}}
 </div>
 
-  <h3 class="review-form-title">Add a Review</h3>
+{{#if user}}
+    <h3 class="review-form-title">Add a Review</h3>
 
-  <form class="review-form-card" method="POST" action="/reviews/park/{{park._id}}">
-    <div class="form-group">
-      <label for="rating">Rating</label>
-      <input type="number" name="rating" min="1" max="5" required>
-    </div>
+    <form class="review-form-card" method="POST" action="/reviews/park/{{park._id}}">
+      <div class="form-group">
+        <label for="rating">Rating</label>
+        <input id="rating" type="number" name="rating" min="1" max="5" required>
+      </div>
 
-    <div class="form-group">
-      <label for="comment">Comment</label>
-      <textarea name="review_content" rows="3" required></textarea>
-    </div>
+      <div class="form-group">
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="review_content" rows="3" required></textarea>
+      </div>
 
-    <button type="submit" class="submit-review-btn">
-      Submit Review
-    </button>
-  </form>
+      <button type="submit" class="submit-review-btn">
+        Submit Review
+      </button>
+    </form>
+  {{else}}
+    <p>Please <a href="/users/login">Log in first</a> to leave a review.</p>
+  {{/if}}
+
 
 </div>
 

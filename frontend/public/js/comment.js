@@ -14,11 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const textarea = form.querySelector('textarea[name="comment_content"]');
       const comment_content = textarea.value.trim();
 
-      if (!comment_content) {
-        showError(form, 'Comment cannot be empty.');
-        return;
-      }
 
+
+
+      if (comment_content === undefined || comment_content === null || typeof comment_content !== 'string' || 
+        comment_content.length < 10 || comment_content.length > 1000 || /(.)\1{4,}/.test(comment_content)) {
+      
+             
+            showError(form, 'This review must be at least 10 characters long and no more than 1000 characters long. And it should not have the same character repeated 5 times or more. ');
+            return
+        }
       try {
         const res = await fetch(form.action, {
           method: 'POST',
